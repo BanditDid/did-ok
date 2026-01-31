@@ -662,6 +662,41 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
+.btn-icon-sub.active-control {
+    background: rgba(0, 242, 255, 0.2);
+    color: var(--accent-color);
+}
+
+.btn-icon-sub.active-control svg {
+    fill: var(--accent-color);
+}
+
+.queue-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #ff00ea;
+    /* บานเย็นเข้มข้น */
+    color: #000000;
+    /* เปลี่ยนเป็นสีดำเพื่อให้อ่านง่ายขึ้นบนสีสว่าง */
+    font-size: 11px;
+    /* เพิ่มขนาดเล็กน้อย */
+    font-weight: 900;
+    /* ปรับให้หนาที่สุด */
+    min-width: 19px;
+    height: 19px;
+    padding: 0 2px;
+    /* ลด padding เพื่อให้ตัวเลขอยู่กลาง */
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #000;
+    pointer-events: none;
+    z-index: 5;
+    line-height: 1;
+}
+
 .time-current,
 .time-duration {
     font-size: 0.9rem;
@@ -1100,6 +1135,180 @@ body {
 .btn-footer-gray:hover {
     background: rgba(255, 255, 255, 0.2);
 }
+
+/* DEFINITIVE Mobile Fixes for Overflow - Last in file wins */
+@media (max-width: 480px) {
+    #share-modal .modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 20px;
+        width: 90%;
+    }
+
+    /* Reduce QR container margins */
+    .remote-qr-container {
+        margin: 10px 0;
+    }
+
+    /* Reduce QR padding */
+    #share-qrcode {
+        padding: 10px;
+    }
+
+    /* Force image size smaller */
+    #share-qrcode img,
+    #share-qrcode canvas {
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+    .neon-text-cyan {
+        font-size: 1.2rem;
+    }
+
+    .remote-info-grid {
+        margin-bottom: 12px;
+        gap: 8px;
+    }
+
+    .remote-link-section {
+        margin-bottom: 12px;
+        padding: 10px;
+    }
+
+    .remote-modal-footer {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .btn-footer-gray {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
+/* Premium Toast Notification */
+.toast {
+    visibility: hidden;
+    min-width: 300px;
+    background: rgba(20, 20, 35, 0.95);
+    color: #fff;
+    text-align: left;
+    border-radius: 16px;
+    padding: 16px 20px;
+    position: fixed;
+    z-index: 2000;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%) translateY(20px);
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(0, 242, 255, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast::before {
+    content: "✓";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #00f2ff, #00c9ff);
+    color: #000;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.toast.error {
+    border-color: rgba(255, 77, 77, 0.3);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(255, 77, 77, 0.15);
+}
+
+.toast.error::before {
+    content: "!";
+    background: linear-gradient(135deg, #ff6b6b, #ff4d4d);
+    color: white;
+}
+
+/* Mobile Toast */
+@media (max-width: 480px) {
+    .toast {
+        min-width: auto;
+        width: 90%;
+        bottom: 25px;
+        padding: 14px 18px;
+        font-size: 0.9rem;
+        border-radius: 14px;
+    }
+}
+
+/* Enhanced Mobile Fixes for Height Overflow */
+@media (max-width: 480px) {
+    #share-modal .modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 20px;
+        width: 90%;
+    }
+
+    .remote-qr-container {
+        margin: 10px 0;
+    }
+
+    #share-qrcode {
+        padding: 10px;
+    }
+
+    #share-qrcode img,
+    #share-qrcode canvas {
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+    .neon-text-cyan {
+        font-size: 1.2rem;
+    }
+
+    .remote-info-grid {
+        margin-bottom: 15px;
+        gap: 10px;
+    }
+
+    .remote-link-section {
+        margin-bottom: 15px;
+        padding: 12px;
+    }
+
+    .remote-modal-footer {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .btn-footer-gray {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
 
 .btn-footer-red:hover {
     background: #ff4d4d;
@@ -4215,4 +4424,143 @@ body {
     .settings-item-label {
         font-size: 0.95rem;
     }
+}
+
+/* Remote Share Modal Styling */
+.remote-qr-container {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0;
+    position: relative;
+    z-index: 2;
+}
+
+#share-qrcode {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 24px;
+    box-shadow: 0 0 40px rgba(0, 242, 255, 0.15),
+        0 0 15px rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+#share-qrcode:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 50px rgba(0, 242, 255, 0.25),
+        0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+#share-qrcode img {
+    display: block;
+}
+
+.remote-hint {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.remote-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-item label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+}
+
+.neon-text-cyan {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.7),
+        0 0 20px rgba(0, 242, 255, 0.5),
+        0 0 30px rgba(0, 242, 255, 0.3);
+    letter-spacing: 2px;
+}
+
+.remote-link-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 15px;
+    margin-bottom: 25px;
+}
+
+.remote-link-section label {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+}
+
+.link-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.link-input-group input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    outline: none;
+    font-family: monospace;
+}
+
+.btn-copy-link {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    padding: 0 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.btn-copy-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.remote-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-footer-gray {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-footer-gray:hover {
+    background: rgba(255, 255, 255, 0.2);
 }

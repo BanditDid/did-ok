@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <title>ถุงซิ่งมิตรสหาย</title>
+    <title>Did.OK | KARAOKE</title>
     <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Prompt:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -49,9 +52,11 @@
             <div class="control-bar control-bar-desktop">
                 <div class="control-left">
                     <button id="main-play-pause" class="play-pause-circle">
-                        <span id="play-pause-icon">||</span>
+                        <svg id="play-pause-icon" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                        </svg>
                     </button>
-                    <button class="btn-icon-sub" id="btn-loop" title="Loop">
+                    <button class="btn-icon-sub" id="btn-loop" onclick="toggleLoop()" title="Loop">
                         <svg viewBox="0 0 24 24" fill="white" width="22" height="22">
                             <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
                         </svg>
@@ -84,10 +89,12 @@
                                 d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                         </svg>
                     </button>
-                    <button class="btn-icon-sub" onclick="togglePanel('queue')" title="Queue">
+                    <button class="btn-icon-sub" onclick="togglePanel('queue')" title="Queue"
+                        style="position: relative;">
                         <svg viewBox="0 0 24 24" fill="white" width="22" height="22">
                             <path d="M4 10h12v2H4zm0-4h12v2H4zm0 8h8v2H4zm10 0v6l5-3z" />
                         </svg>
+                        <span id="queue-badge" class="queue-badge" style="display: none;">0</span>
                     </button>
                     <button class="btn-icon-sub" onclick="openRemoteModal()" title="Room Info">
                         <svg viewBox="0 0 24 24" fill="white" width="22" height="22">
@@ -116,7 +123,7 @@
                         <path d="M8 5v14l11-7z" />
                     </svg>
                 </button>
-                <button class="btn-icon-sub" id="btn-loop-mobile" title="Loop">
+                <button class="btn-icon-sub" id="btn-loop-mobile" onclick="toggleLoop()" title="Loop">
                     <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
                         <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
                     </svg>
@@ -132,10 +139,11 @@
                             d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                     </svg>
                 </button>
-                <button class="btn-icon-sub" onclick="togglePanel('queue')" title="Queue">
+                <button class="btn-icon-sub" onclick="togglePanel('queue')" title="Queue" style="position: relative;">
                     <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
                         <path d="M4 10h12v2H4zm0-4h12v2H4zm0 8h8v2H4zm10 0v6l5-3z" />
                     </svg>
+                    <span id="queue-badge-mobile" class="queue-badge" style="display: none;">0</span>
                 </button>
                 <button class="btn-icon-sub" onclick="openRemoteModal()" title="Room Info">
                     <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
@@ -579,13 +587,13 @@
                 const mobileIcon = document.getElementById('play-icon-mobile');
                 if (event.data == YT.PlayerState.PLAYING) {
                     isPlaying = true;
-                    icon.innerText = '||';
+                    icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
                     if (mobileIcon) {
                         mobileIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
                     }
                 } else if (event.data == YT.PlayerState.PAUSED) {
                     isPlaying = false;
-                    icon.innerText = '▶';
+                    icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
                     if (mobileIcon) {
                         mobileIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
                     }
@@ -675,6 +683,26 @@
             }
 
             document.getElementById('main-play-pause').onclick = togglePlayPause;
+
+            // Loop Toggle
+            let isLooping = false;
+            function toggleLoop() {
+                isLooping = !isLooping;
+                if (player && player.setLoop) {
+                    player.setLoop(isLooping);
+                }
+                const btnLoop = document.getElementById('btn-loop');
+                const btnLoopMobile = document.getElementById('btn-loop-mobile');
+                if (isLooping) {
+                    btnLoop.classList.add('active-control');
+                    if (btnLoopMobile) btnLoopMobile.classList.add('active-control');
+                    showToast('เปิดโหมดเล่นซ้ำ');
+                } else {
+                    btnLoop.classList.remove('active-control');
+                    if (btnLoopMobile) btnLoopMobile.classList.remove('active-control');
+                    showToast('ปิดโหมดเล่นซ้ำ');
+                }
+            }
 
             document.getElementById('volume-range').oninput = (e) => {
                 player.setVolume(e.target.value);
@@ -927,6 +955,21 @@
 
                 queueCount.innerText = `${queue.length} เพลง`;
                 queueListDisplay.innerHTML = '';
+
+                // Update queue badges
+                const badge = document.getElementById('queue-badge');
+                const badgeMobile = document.getElementById('queue-badge-mobile');
+                if (queue.length > 0) {
+                    badge.innerText = queue.length;
+                    badge.style.display = 'flex';
+                    if (badgeMobile) {
+                        badgeMobile.innerText = queue.length;
+                        badgeMobile.style.display = 'flex';
+                    }
+                } else {
+                    badge.style.display = 'none';
+                    if (badgeMobile) badgeMobile.style.display = 'none';
+                }
 
                 queue.forEach((song, index) => {
                     const div = document.createElement('div');

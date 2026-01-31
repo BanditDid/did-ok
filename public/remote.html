@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DID Remote</title>
     <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Prompt:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -726,7 +729,8 @@
         // Toast notification function
         function showToast(message) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+            toast.innerHTML = `<span>${message}</span>`;
+            toast.classList.remove('error');
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');
