@@ -729,8 +729,7 @@
         // Toast notification function
         function showToast(message) {
             const toast = document.getElementById('toast');
-            toast.innerHTML = `<span>${message}</span>`;
-            toast.classList.remove('error');
+            toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');
