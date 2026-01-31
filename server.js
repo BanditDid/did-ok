@@ -2,11 +2,17 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const ytsr = require('ytsr');
+const yts = require('yt-search');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    },
+    transports: ['websocket', 'polling']
+});
 
 const PORT = process.env.PORT || 3000;
 
@@ -28,16 +34,14 @@ app.get('/api/search', async (req, res) => {
     try {
         // Optionally enforce "karaoke" search
         const searchQuery = karaokeOnly ? `${query} karaoke` : query;
-        const searchResults = await ytsr(searchQuery, { limit: 15 });
-        const songs = searchResults.items
-            .filter(item => item.type === 'video')
-            .map(video => ({
-                id: video.id,
-                title: video.title,
-                thumbnail: video.bestThumbnail.url,
-                duration: video.duration,
-                author: video.author.name
-            }));
+        const searchResults = await yts(searchQuery);
+        const songs = searchResults.videos.slice(0, 15).map(video => ({
+            id: video.videoId,
+            title: video.title,
+            thumbnail: video.thumbnail,
+            duration: video.timestamp,
+            author: video.author.name
+        }));
         res.json(songs);
     } catch (error) {
         console.error('Search error:', error);
@@ -45,12 +49,29 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
+// Default permissions for remote control
+const defaultPermissions = {
+    autoSearch: false,      // ค้นหาอัตโนมัติ หลังการพิมพ์เสร็จ
+    addToQueue: true,       // เพิ่มเพลงในคิว
+    removeFromQueue: true,  // ลบเพลงในคิว
+    playFromQueue: true,    // เล่นเพลงในคิว
+    playPause: true,        // เล่น/หยุด
+    volume: true,           // เพิ่มลดเสียง
+    shareRemote: true,      // แชร์รีโมท
+    editRemoteName: true    // แก้ไขชื่อรีโมท
+};
+
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
     socket.on('create-room', () => {
         const roomId = generateRoomId();
-        rooms[roomId] = { host: socket.id, queue: [], currentSong: null };
+        rooms[roomId] = {
+            host: socket.id,
+            queue: [],
+            currentSong: null,
+            permissions: { ...defaultPermissions }
+        };
         socket.join(roomId);
         socket.emit('room-created', roomId);
     });
@@ -58,7 +79,12 @@ io.on('connection', (socket) => {
     socket.on('join-room', (roomId) => {
         if (rooms[roomId]) {
             socket.join(roomId);
-            socket.emit('room-joined', { roomId, queue: rooms[roomId].queue, currentSong: rooms[roomId].currentSong });
+            socket.emit('room-joined', {
+                roomId,
+                queue: rooms[roomId].queue,
+                currentSong: rooms[roomId].currentSong,
+                permissions: rooms[roomId].permissions
+            });
             console.log(`User ${socket.id} joined room ${roomId}`);
         } else {
             socket.emit('error', 'Room not found');
@@ -70,8 +96,21 @@ io.on('connection', (socket) => {
         if (rooms[roomId]) {
             socket.emit('full-sync', {
                 queue: rooms[roomId].queue,
-                currentSong: rooms[roomId].currentSong
+                currentSong: rooms[roomId].currentSong,
+                permissions: rooms[roomId].permissions
             });
+        }
+    });
+
+    // Update permissions from host
+    socket.on('update-permissions', ({ roomId, permissions }) => {
+        console.log('Received update-permissions:', roomId, permissions, 'from:', socket.id);
+        console.log('Room host:', rooms[roomId]?.host, 'Socket:', socket.id, 'Match:', rooms[roomId]?.host === socket.id);
+        if (rooms[roomId] && rooms[roomId].host === socket.id) {
+            rooms[roomId].permissions = { ...rooms[roomId].permissions, ...permissions };
+            console.log('Broadcasting permissions-updated to room:', roomId);
+            // Broadcast to all clients in the room (including remotes)
+            socket.to(roomId).emit('permissions-updated', rooms[roomId].permissions);
         }
     });
 
@@ -141,6 +180,13 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Broadcast song errors to remotes
+    socket.on('song-error', ({ roomId, songTitle, reason }) => {
+        if (rooms[roomId]) {
+            socket.to(roomId).emit('song-error', { songTitle, reason });
+        }
+    });
+
     socket.on('set-volume', ({ roomId, volume }) => {
         if (rooms[roomId]) {
             socket.to(rooms[roomId].host).emit('set-volume', volume);
@@ -154,5 +200,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Server running on https://did-ok.onrender.com:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

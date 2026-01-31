@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <title>Antigravity Karaoke - Host</title>
+    <title>ถุงซิ่งมิตรสหาย</title>
     <link rel="stylesheet" href="style.css">
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -16,6 +16,21 @@
         <div id="player-wrapper">
             <div id="player"></div>
             <div class="video-overlay"></div>
+            <!-- Error Cover Overlay - hides YouTube's ugly error screen -->
+            <div id="player-error-cover" class="player-error-cover">
+                <div class="player-error-content">
+                    <div class="player-error-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="80"
+                            height="80">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                    <h2 class="player-error-title">เล่นวิดีโอนี้ไม่ได้</h2>
+                    <p class="player-error-subtitle">กำลังข้ามไปเพลงถัดไป...</p>
+                </div>
+            </div>
         </div>
 
         <!-- Controls Overlay -->
@@ -85,6 +100,12 @@
                             <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
                         </svg>
                     </button>
+                    <button class="btn-icon-sub" onclick="openSettingsModal()" title="Settings">
+                        <svg viewBox="0 0 24 24" fill="white" width="22" height="22">
+                            <path
+                                d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -127,6 +148,12 @@
                         <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
                     </svg>
                 </button>
+                <button class="btn-icon-sub" onclick="openSettingsModal()" title="Settings">
+                    <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
+                        <path
+                            d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -151,7 +178,8 @@
                     </label>
                 </div>
                 <div class="modal-search-box">
-                    <input type="text" id="modal-search-input" placeholder="ค้นหาเพลง ศิลปิน หรือรหัสเพลง...">
+                    <input type="text" id="modal-search-input" placeholder="ค้นหาเพลง ศิลปิน หรือรหัสเพลง..."
+                        enterkeyhint="search">
                     <button class="btn-clear-input" id="clear-modal-search-btn" onclick="clearModalSearchInput()"
                         style="display: none;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -256,6 +284,141 @@
             </div>
         </div>
 
+        <!-- Empty Queue Modal -->
+        <div id="empty-queue-modal" class="empty-queue-modal">
+            <div class="empty-queue-modal-content">
+                <!-- <button class="btn-close-empty-modal" onclick="hideEmptyQueueModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button> -->
+                <div class="empty-queue-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="80"
+                        height="80">
+                        <path d="M9 18V5l12-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                        <circle cx="18" cy="16" r="3" />
+                    </svg>
+                </div>
+                <h2 class="empty-queue-title">ไม่มีเพลงในคิว</h2>
+                <p class="empty-queue-subtitle">สแกน QR Code เพื่อเพิ่มเพลง</p>
+                <div class="empty-queue-qr-container">
+                    <div id="empty-queue-qrcode"></div>
+                </div>
+                <div class="empty-queue-room-info">
+                    <span>รหัสห้อง: <strong id="empty-queue-room-id">------</strong></span>
+                </div>
+                <button class="btn-home-empty" onclick="window.location.href='/'">กลับหน้าหลัก</button>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="settings-modal">
+            <div class="settings-modal-content">
+                <div class="settings-header">
+                    <h3>ตั้งค่าการควบคุมรีโมท</h3>
+                    <button class="btn-close-settings" onclick="closeSettingsModal()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"
+                            height="24">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="settings-body">
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <span class="settings-item-label">ค้นหาอัตโนมัติ</span>
+                            <span class="settings-item-desc">ค้นหาทันทีหลังพิมพ์เสร็จ</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="perm-autoSearch"
+                                onchange="updatePermission('autoSearch', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <span class="settings-item-label">เพิ่มเพลงในคิว</span>
+                            <span class="settings-item-desc">อนุญาตให้เพิ่มเพลงใหม่</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="perm-addToQueue" checked
+                                onchange="updatePermission('addToQueue', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <span class="settings-item-label">ลบเพลงในคิว</span>
+                            <span class="settings-item-desc">อนุญาตให้ลบเพลงออก</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="perm-removeFromQueue" checked
+                                onchange="updatePermission('removeFromQueue', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <span class="settings-item-label">เล่นเพลงในคิว</span>
+                            <span class="settings-item-desc">อนุญาตให้เลือกเล่นเพลง</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="perm-playFromQueue" checked
+                                onchange="updatePermission('playFromQueue', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <span class="settings-item-label">เล่น/หยุด/ถัดไป</span>
+                            <span class="settings-item-desc">อนุญาตให้ควบคุมการเล่น</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="perm-playPause" checked
+                                onchange="updatePermission('playPause', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <span class="settings-item-label">เพิ่มลดเสียง</span>
+                            <span class="settings-item-desc">อนุญาตให้ปรับระดับเสียง</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="perm-volume" checked
+                                onchange="updatePermission('volume', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <span class="settings-item-label">แชร์รีโมท</span>
+                            <span class="settings-item-desc">อนุญาตให้แชร์ลิงก์รีโมท</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="perm-shareRemote" checked
+                                onchange="updatePermission('shareRemote', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <span class="settings-item-label">แก้ไขชื่อรีโมท</span>
+                            <span class="settings-item-desc">อนุญาตให้เปลี่ยนชื่อผู้ใช้</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="perm-editRemoteName" checked
+                                onchange="updatePermission('editRemoteName', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Scoring Overlay -->
         <div id="score-overlay">
             <div class="score-card">
@@ -264,193 +427,342 @@
                 <p>Ready for the next one?</p>
             </div>
         </div>
-    </div>
 
-    <!-- Hidden queue source for toggle -->
-    <div id="queue-source" style="display: none;">
-        <div id="queue-list"></div>
-    </div>
+        <!-- Error Countdown Modal -->
+        <div id="error-countdown-modal" class="error-countdown-modal">
+            <div class="error-countdown-content">
+                <div class="error-icon-container">
+                    <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        width="60" height="60">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                </div>
+                <h2 class="error-countdown-title">ไม่สามารถเล่นเพลงนี้ได้</h2>
+                <p class="error-countdown-subtitle" id="error-reason">วิดีโอไม่พร้อมใช้งาน</p>
+                <div class="countdown-circle-container">
+                    <svg class="countdown-circle" viewBox="0 0 100 100">
+                        <circle class="countdown-bg" cx="50" cy="50" r="45"></circle>
+                        <circle class="countdown-progress" cx="50" cy="50" r="45"></circle>
+                    </svg>
+                    <span class="countdown-number" id="countdown-number">3</span>
+                </div>
+                <p class="countdown-text">เล่นเพลงถัดไปใน...</p>
+                <button class="btn-skip-now" onclick="skipNowFromError()">ข้ามทันที</button>
+            </div>
+        </div>
 
-    <script>
-        const socket = io();
-        let player;
-        let currentRoomId = '';
-        let currentSong = null;
-        let isPlaying = false;
-        let progressInterval;
-        let searchTimeout;
-        const modalSearchInput = document.getElementById('modal-search-input');
-        const clearModalSearchBtn = document.getElementById('clear-modal-search-btn');
+        <!-- Hidden queue source for toggle -->
+        <!-- Hidden queue source for toggle -->
+        <div id="queue-source" style="display: none;">
+            <div id="queue-list"></div>
+        </div>
 
-        // Toggle clear button visibility for modal search
-        modalSearchInput.addEventListener('input', () => {
-            clearModalSearchBtn.style.display = modalSearchInput.value.length > 0 ? 'flex' : 'none';
-        });
+        <!-- Toast Notification -->
+        <div id="toast" class="toast"></div>
 
-        function clearModalSearchInput() {
-            modalSearchInput.value = '';
-            clearModalSearchBtn.style.display = 'none';
-            document.getElementById('modal-results-list').innerHTML = '';
-            modalSearchInput.focus();
-        }
+        <script>
+            const socket = io();
+            let player;
+            let currentRoomId = '';
+            let currentQueue = [];
+            let currentSong = null;
+            let isPlaying = false;
+            let progressInterval;
+            let searchTimeout;
 
-        // Toggle switch listener - focus input and re-search
-        document.getElementById('host-karaoke-filter-toggle').addEventListener('change', () => {
-            modalSearchInput.focus();
-            if (modalSearchInput.value.trim().length >= 2) {
-                performModalSearch();
+            function showToast(msg) {
+                const toast = document.getElementById('toast');
+                toast.innerText = msg;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
             }
-        });
+            const modalSearchInput = document.getElementById('modal-search-input');
+            const clearModalSearchBtn = document.getElementById('clear-modal-search-btn');
 
-        // Load YouTube IFrame API
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            // Toggle clear button visibility for modal search
+            modalSearchInput.addEventListener('input', () => {
+                clearModalSearchBtn.style.display = modalSearchInput.value.length > 0 ? 'flex' : 'none';
+            });
 
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                videoId: '',
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 0, // Custom controls
-                    'modestbranding': 1,
-                    'rel': 0,
-                    'iv_load_policy': 3
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
+            function clearModalSearchInput() {
+                modalSearchInput.value = '';
+                clearModalSearchBtn.style.display = 'none';
+                document.getElementById('modal-results-list').innerHTML = '';
+                modalSearchInput.focus();
+            }
+
+            // Toggle switch listener - focus input and re-search
+            document.getElementById('host-karaoke-filter-toggle').addEventListener('change', () => {
+                modalSearchInput.focus();
+                if (modalSearchInput.value.trim().length >= 2) {
+                    performModalSearch();
                 }
             });
-        }
 
-        function onPlayerReady(event) {
-            socket.emit('create-room');
+            // Load YouTube IFrame API
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-            // Progress Bar Logic
-            progressInterval = setInterval(() => {
-                if (player && player.getCurrentTime) {
-                    const currentTime = player.getCurrentTime();
-                    const duration = player.getDuration();
-                    const volume = player.getVolume();
-
-                    if (duration > 0) {
-                        const percent = (currentTime / duration) * 100;
-                        document.getElementById('progress-fill').style.width = percent + '%';
-                        document.getElementById('time-current').innerText = formatTime(currentTime);
-                        document.getElementById('time-duration').innerText = formatTime(duration);
-
-                        // Emit state to remote
-                        socket.emit('player-state', {
-                            roomId: currentRoomId,
-                            isPlaying,
-                            volume,
-                            currentTime,
-                            duration
-                        });
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player('player', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: '',
+                    playerVars: {
+                        'autoplay': 1,
+                        'controls': 0, // Custom controls
+                        'modestbranding': 1,
+                        'rel': 0,
+                        'iv_load_policy': 3
+                    },
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange,
+                        'onError': onPlayerError
                     }
-                }
-            }, 1000);
-        }
+                });
+            }
 
-        function skipToNext() {
-            if (currentRoomId) {
+            function onPlayerReady(event) {
+                socket.emit('create-room');
+
+                // Progress Bar Logic
+                progressInterval = setInterval(() => {
+                    if (player && player.getCurrentTime) {
+                        const currentTime = player.getCurrentTime();
+                        const duration = player.getDuration();
+                        const volume = player.getVolume();
+
+                        if (duration > 0) {
+                            const percent = (currentTime / duration) * 100;
+                            document.getElementById('progress-fill').style.width = percent + '%';
+                            document.getElementById('time-current').innerText = formatTime(currentTime);
+                            document.getElementById('time-duration').innerText = formatTime(duration);
+
+                            // Emit state to remote
+                            socket.emit('player-state', {
+                                roomId: currentRoomId,
+                                isPlaying,
+                                volume,
+                                currentTime,
+                                duration
+                            });
+                        }
+                    }
+                }, 1000);
+            }
+
+            function skipToNext() {
+                if (currentQueue.length === 0) {
+                    showToast('ไม่มีเพลงในคิว');
+                    return;
+                }
+                if (currentRoomId) {
+                    socket.emit('request-next', currentRoomId);
+                }
+            }
+
+            function formatTime(seconds) {
+                const min = Math.floor(seconds / 60);
+                const sec = Math.floor(seconds % 60);
+                return min + ":" + (sec < 10 ? "0" : "") + sec;
+            }
+
+            function onPlayerStateChange(event) {
+                const icon = document.getElementById('play-pause-icon');
+                const mobileIcon = document.getElementById('play-icon-mobile');
+                if (event.data == YT.PlayerState.PLAYING) {
+                    isPlaying = true;
+                    icon.innerText = '||';
+                    if (mobileIcon) {
+                        mobileIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+                    }
+                } else if (event.data == YT.PlayerState.PAUSED) {
+                    isPlaying = false;
+                    icon.innerText = '▶';
+                    if (mobileIcon) {
+                        mobileIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+                    }
+                } else if (event.data == YT.PlayerState.ENDED) {
+                    socket.emit('request-next', currentRoomId);
+                }
+            }
+
+            // Handle YouTube Player Errors - Show countdown modal and skip to next
+            let errorCountdownInterval = null;
+
+            function onPlayerError(event) {
+                console.error('YouTube Player Error:', event.data);
+                const errorMessages = {
+                    2: 'รหัสวิดีโอไม่ถูกต้อง',
+                    5: 'เกิดข้อผิดพลาดในการเล่น',
+                    100: 'วิดีโอไม่พบหรือถูกลบแล้ว',
+                    101: 'วิดีโอนี้ไม่อนุญาตให้เล่นนอก YouTube',
+                    150: 'วิดีโอนี้ไม่อนุญาตให้เล่นนอก YouTube'
+                };
+                const errorMsg = errorMessages[event.data] || 'เกิดข้อผิดพลาดไม่ทราบสาเหตุ';
+
+                // Notify remote about the error
+                socket.emit('song-error', {
+                    roomId: currentRoomId,
+                    songTitle: currentSong?.title || 'เพลงนี้',
+                    reason: errorMsg
+                });
+
+                showErrorCountdownModal(errorMsg);
+            }
+
+            function showErrorCountdownModal(reason) {
+                const modal = document.getElementById('error-countdown-modal');
+                const countdownNumber = document.getElementById('countdown-number');
+                const progressCircle = document.querySelector('.countdown-progress');
+                const errorReasonEl = document.getElementById('error-reason');
+
+                errorReasonEl.innerText = reason;
+                modal.classList.add('active');
+
+                // Show the player error cover to hide YouTube's ugly error
+                document.getElementById('player-error-cover').classList.add('active');
+
+                let countdown = 5;
+                countdownNumber.innerText = countdown;
+
+                // Reset progress circle
+                const circumference = 2 * Math.PI * 45; // r=45
+                progressCircle.style.strokeDasharray = circumference;
+                progressCircle.style.strokeDashoffset = 0;
+
+                // Animate countdown
+                errorCountdownInterval = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        countdownNumber.innerText = countdown;
+                        progressCircle.style.strokeDashoffset = circumference * (1 - countdown / 5);
+                    } else {
+                        clearInterval(errorCountdownInterval);
+                        hideErrorCountdownModal();
+                        socket.emit('request-next', currentRoomId);
+                    }
+                }, 1000);
+            }
+
+            function hideErrorCountdownModal() {
+                const modal = document.getElementById('error-countdown-modal');
+                modal.classList.remove('active');
+                // Also hide the player error cover
+                document.getElementById('player-error-cover').classList.remove('active');
+                if (errorCountdownInterval) {
+                    clearInterval(errorCountdownInterval);
+                    errorCountdownInterval = null;
+                }
+            }
+
+            function skipNowFromError() {
+                hideErrorCountdownModal();
                 socket.emit('request-next', currentRoomId);
             }
-        }
 
-        function formatTime(seconds) {
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60);
-            return min + ":" + (sec < 10 ? "0" : "") + sec;
-        }
+            // Controls
+            function togglePlayPause() {
+                if (isPlaying) player.pauseVideo();
+                else player.playVideo();
+            }
 
-        function onPlayerStateChange(event) {
-            const icon = document.getElementById('play-pause-icon');
-            const mobileIcon = document.getElementById('play-icon-mobile');
-            if (event.data == YT.PlayerState.PLAYING) {
-                isPlaying = true;
-                icon.innerText = '||';
-                if (mobileIcon) {
-                    mobileIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+            document.getElementById('main-play-pause').onclick = togglePlayPause;
+
+            document.getElementById('volume-range').oninput = (e) => {
+                player.setVolume(e.target.value);
+            };
+
+            function toggleFullscreen() {
+                const doc = window.document;
+                const docEl = doc.documentElement;
+                const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+                const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+                if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                    requestFullScreen.call(docEl);
+                } else {
+                    cancelFullScreen.call(doc);
                 }
-            } else if (event.data == YT.PlayerState.PAUSED) {
-                isPlaying = false;
-                icon.innerText = '▶';
-                if (mobileIcon) {
-                    mobileIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+            }
+
+            function togglePanel(type) {
+                const sidePanel = document.getElementById('side-panel');
+                if (type === 'queue') {
+                    sidePanel.classList.toggle('active');
                 }
-            } else if (event.data == YT.PlayerState.ENDED) {
-                showScore();
             }
-        }
 
-        // Controls
-        function togglePlayPause() {
-            if (isPlaying) player.pauseVideo();
-            else player.playVideo();
-        }
-
-        document.getElementById('main-play-pause').onclick = togglePlayPause;
-
-        document.getElementById('volume-range').oninput = (e) => {
-            player.setVolume(e.target.value);
-        };
-
-        function toggleFullscreen() {
-            const doc = window.document;
-            const docEl = doc.documentElement;
-            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-
-            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-                requestFullScreen.call(docEl);
-            } else {
-                cancelFullScreen.call(doc);
+            function closePanel() {
+                document.getElementById('side-panel').classList.remove('active');
             }
-        }
 
-        function togglePanel(type) {
-            const sidePanel = document.getElementById('side-panel');
-            if (type === 'queue') {
-                sidePanel.classList.toggle('active');
+            // Settings Modal Logic
+            function openSettingsModal() {
+                document.getElementById('settings-modal').classList.add('active');
             }
-        }
 
-        function closePanel() {
-            document.getElementById('side-panel').classList.remove('active');
-        }
+            function closeSettingsModal() {
+                document.getElementById('settings-modal').classList.remove('active');
+            }
 
-        // Search Modal Logic
-        function openSearchModal() {
-            document.getElementById('search-modal').classList.add('active');
-            document.getElementById('modal-search-input').focus();
-        }
+            function updatePermission(key, value) {
+                console.log('Updating permission:', key, '=', value, 'for room:', currentRoomId);
+                socket.emit('update-permissions', {
+                    roomId: currentRoomId,
+                    permissions: { [key]: value }
+                });
+            }
 
-        function closeSearchModal() {
-            document.getElementById('search-modal').classList.remove('active');
-        }
+            // Search Modal Logic
+            function openSearchModal() {
+                document.getElementById('search-modal').classList.add('active');
+                document.getElementById('modal-search-input').focus();
+            }
 
-        async function performModalSearch() {
-            const query = document.getElementById('modal-search-input').value;
-            if (!query) return;
+            function closeSearchModal() {
+                document.getElementById('search-modal').classList.remove('active');
+            }
 
-            const resultsList = document.getElementById('modal-results-list');
-            resultsList.innerHTML = '<div class="loading">Searching...</div>';
+            async function performModalSearch() {
+                const query = document.getElementById('modal-search-input').value;
+                if (!query) return;
 
-            try {
-                const karaokeOnly = document.getElementById('host-karaoke-filter-toggle').checked;
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&karaokeOnly=${karaokeOnly}`);
-                const songs = await response.json();
+                const resultsList = document.getElementById('modal-results-list');
+                resultsList.innerHTML = `
+                    <div class="search-loading">
+                        <div class="search-loading-notes">
+                            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                        </div>
+                        <div class="search-loading-spinner"></div>
+                        <div class="search-loading-text">
+                            กำลังค้นหา
+                            <div class="search-loading-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
 
-                resultsList.innerHTML = '';
-                songs.forEach(song => {
-                    const card = document.createElement('div');
-                    card.className = 'modal-song-card';
-                    card.innerHTML = `
+                try {
+                    const karaokeOnly = document.getElementById('host-karaoke-filter-toggle').checked;
+                    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&karaokeOnly=${karaokeOnly}`);
+                    const songs = await response.json();
+
+                    resultsList.innerHTML = '';
+                    songs.forEach(song => {
+                        const card = document.createElement('div');
+                        card.className = 'modal-song-card';
+                        card.innerHTML = `
                         <img src="${song.thumbnail}" class="modal-song-thumb">
                         <div class="modal-song-info">
                             <h4>${song.title}</h4>
@@ -461,118 +773,171 @@
                             <span class="btn-text">เพิ่ม</span>
                         </button>
                     `;
-                    card.querySelector('.btn-add-modal').onclick = () => {
-                        socket.emit('add-to-queue', { roomId: currentRoomId, song });
-                        closeSearchModal();
-                    };
-                    resultsList.appendChild(card);
-                });
-            } catch (error) {
-                resultsList.innerHTML = '<div class="error">Search failed</div>';
-            }
-        }
+                        card.querySelector('.btn-add-modal').onclick = (e) => {
+                            const btn = e.currentTarget;
+                            const originalText = btn.innerHTML;
 
-        document.getElementById('modal-search-input').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            const query = e.target.value.trim();
-            if (query.length >= 2) {
-                searchTimeout = setTimeout(() => {
-                    performModalSearch();
-                }, 1500);
-            }
-        });
+                            socket.emit('add-to-queue', { roomId: currentRoomId, song });
 
-        document.getElementById('modal-search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+                            // Feedback
+                            btn.innerHTML = '✓';
+                            btn.classList.add('added');
+                            btn.disabled = true;
+
+                            showToast(`เพิ่ม "${song.title.substring(0, 30)}..." ลงคิวแล้ว`);
+
+                            setTimeout(() => {
+                                btn.innerHTML = originalText;
+                                btn.classList.remove('added');
+                                btn.disabled = false;
+                            }, 1500);
+                        };
+                        resultsList.appendChild(card);
+                    });
+                } catch (error) {
+                    resultsList.innerHTML = '<div class="error">Search failed</div>';
+                }
+            }
+
+            document.getElementById('modal-search-input').addEventListener('input', (e) => {
                 clearTimeout(searchTimeout);
-                performModalSearch();
-            }
-        });
-
-        function clearQueue() {
-            if (confirm('คุณต้องการล้างคิวเพลงทั้งหมดหรือไม่?')) {
-                socket.emit('clear-queue', currentRoomId);
-            }
-        }
-
-        function openRemoteModal() {
-            document.getElementById('remote-modal').classList.add('active');
-        }
-
-        function closeRemoteModal() {
-            document.getElementById('remote-modal').classList.remove('active');
-        }
-
-        function copyRoomLink() {
-            const linkInput = document.getElementById('remote-link-input');
-            linkInput.select();
-            document.execCommand('copy');
-            const btn = document.querySelector('.btn-copy-link');
-            const originalText = btn.innerText;
-            btn.innerText = 'คัดลอกแล้ว!';
-            setTimeout(() => btn.innerText = originalText, 2000);
-        }
-
-        function resetRoom() {
-            if (confirm('คุณต้องการรีเซ็ตห้องและล้างคิวทั้งหมดหรือไม่?')) {
-                window.location.reload();
-            }
-        }
-
-        socket.on('room-created', (roomId) => {
-            currentRoomId = roomId;
-            document.getElementById('room-id-display').innerText = roomId;
-
-            // Generate QR Code
-            const remoteUrl = `${window.location.origin}/remote.html?room=${roomId}`;
-            const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = ''; // Clear previous
-            new QRCode(qrContainer, {
-                text: remoteUrl,
-                width: 180,
-                height: 180,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+                const query = e.target.value.trim();
+                if (query.length >= 2) {
+                    searchTimeout = setTimeout(() => {
+                        performModalSearch();
+                    }, 1500);
+                }
             });
 
-            // Update link input
-            document.getElementById('remote-link-input').value = remoteUrl;
-            console.log("Remote URL:", remoteUrl);
+            document.getElementById('modal-search-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    clearTimeout(searchTimeout);
+                    performModalSearch();
+                }
+            });
 
-            // Handle automatic song addition from landing page
-            const urlParams = new URLSearchParams(window.location.search);
-            const songIdToAdd = urlParams.get('add');
-            if (songIdToAdd) {
-                // Remove the parameter from URL without refreshing
-                window.history.replaceState({}, document.title, window.location.pathname);
-
-                // Fetch song details and add to queue
-                fetch(`/api/search?q=${songIdToAdd}`).then(res => res.json()).then(songs => {
-                    const song = songs.find(s => s.id === songIdToAdd);
-                    if (song) {
-                        socket.emit('add-to-queue', { roomId: currentRoomId, song });
+            function clearQueue() {
+                showConfirmModal(
+                    'ล้างคิวเพลง',
+                    'คุณต้องการล้างคิวเพลงทั้งหมดหรือไม่?',
+                    () => {
+                        socket.emit('clear-queue', currentRoomId);
                     }
-                });
+                );
             }
-        });
 
-        socket.on('queue-updated', (queue) => {
-            const queueListDisplay = document.getElementById('queue-list-display');
-            const queueCount = document.getElementById('queue-count');
+            function openRemoteModal() {
+                document.getElementById('remote-modal').classList.add('active');
+            }
 
-            queueCount.innerText = `${queue.length} เพลง`;
-            queueListDisplay.innerHTML = '';
+            function closeRemoteModal() {
+                document.getElementById('remote-modal').classList.remove('active');
+            }
 
-            queue.forEach((song, index) => {
-                const div = document.createElement('div');
-                div.className = 'queue-card';
-                div.innerHTML = `
+            function copyRoomLink() {
+                const linkInput = document.getElementById('remote-link-input');
+                linkInput.select();
+                document.execCommand('copy');
+                const btn = document.querySelector('.btn-copy-link');
+                const originalText = btn.innerText;
+                btn.innerText = 'คัดลอกแล้ว!';
+                setTimeout(() => btn.innerText = originalText, 2000);
+            }
+
+            function resetRoom() {
+                if (confirm('คุณต้องการรีเซ็ตห้องและล้างคิวทั้งหมดหรือไม่?')) {
+                    window.location.reload();
+                }
+            }
+
+            socket.on('room-created', (roomId) => {
+                currentRoomId = roomId;
+                document.getElementById('room-id-display').innerText = roomId;
+
+                // Generate QR Code
+                const remoteUrl = `${window.location.origin}/remote.html?room=${roomId}`;
+                const qrContainer = document.getElementById("qrcode");
+                qrContainer.innerHTML = ''; // Clear previous
+                new QRCode(qrContainer, {
+                    text: remoteUrl,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+
+                // Update link input
+                document.getElementById('remote-link-input').value = remoteUrl;
+                console.log("Remote URL:", remoteUrl);
+
+                // Generate QR Code for Empty Queue Modal
+                const emptyQueueQrContainer = document.getElementById("empty-queue-qrcode");
+                emptyQueueQrContainer.innerHTML = '';
+                new QRCode(emptyQueueQrContainer, {
+                    text: remoteUrl,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+                document.getElementById('empty-queue-room-id').innerText = roomId;
+
+                // Handle automatic song addition from landing page
+                // Try sessionStorage first, then URL parameter as fallback (for mobile)
+                let pendingSong = null;
+
+                // Try sessionStorage
+                try {
+                    const pendingSongJson = sessionStorage.getItem('pendingSong');
+                    if (pendingSongJson) {
+                        sessionStorage.removeItem('pendingSong');
+                        pendingSong = JSON.parse(pendingSongJson);
+                    }
+                } catch (e) {
+                    console.warn('sessionStorage not available');
+                }
+
+                // Fallback to URL parameter
+                if (!pendingSong) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const songParam = urlParams.get('song');
+                    if (songParam) {
+                        try {
+                            pendingSong = JSON.parse(decodeURIComponent(songParam));
+                            // Clean URL
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        } catch (e) {
+                            console.error('Failed to parse song from URL:', e);
+                        }
+                    }
+                }
+
+                // Add song to queue if found
+                if (pendingSong && pendingSong.id) {
+                    socket.emit('add-to-queue', { roomId: currentRoomId, song: pendingSong });
+                }
+            });
+
+            socket.on('queue-updated', (queue) => {
+                currentQueue = queue;
+                const queueListDisplay = document.getElementById('queue-list-display');
+                const queueCount = document.getElementById('queue-count');
+
+                queueCount.innerText = `${queue.length} เพลง`;
+                queueListDisplay.innerHTML = '';
+
+                queue.forEach((song, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'queue-card';
+                    div.innerHTML = `
                     <div class="queue-card-inner">
                         <img src="${song.thumbnail}" class="queue-card-thumb">
                         <div class="queue-card-info">
                             <h4 class="queue-card-title">${song.title}</h4>
                             <p class="queue-card-author">${song.author}</p>
+                            ${song.addedBy ? `<span class="queue-card-added-by">เพิ่มโดย: ${song.addedBy}</span>` : ''}
                         </div>
                         <div class="queue-card-actions">
                             <button class="btn-play-now" title="เล่นทันที">
@@ -585,169 +950,187 @@
                     </div>
                 `;
 
-                div.querySelector('.btn-play-now').onclick = (e) => {
-                    e.stopPropagation();
-                    if (!currentRoomId) return alert('Room not ready');
-                    socket.emit('play-specific', { roomId: currentRoomId, index });
-                };
+                    div.querySelector('.btn-play-now').onclick = (e) => {
+                        e.stopPropagation();
+                        if (!currentRoomId) return alert('Room not ready');
+                        socket.emit('play-specific', { roomId: currentRoomId, index });
+                    };
 
-                div.querySelector('.btn-delete-song').onclick = (e) => {
-                    e.stopPropagation();
-                    if (!currentRoomId) return alert('Room not ready');
-                    socket.emit('remove-from-queue', { roomId: currentRoomId, index });
-                };
+                    div.querySelector('.btn-delete-song').onclick = (e) => {
+                        e.stopPropagation();
+                        if (!currentRoomId) return alert('Room not ready');
+                        socket.emit('remove-from-queue', { roomId: currentRoomId, index });
+                    };
 
-                queueListDisplay.appendChild(div);
+                    queueListDisplay.appendChild(div);
+                });
+
+                // If nothing is playing and we have items, request next
+                if (!currentSong && queue.length > 0) {
+                    socket.emit('request-next', currentRoomId);
+                }
+
+                // Close empty queue modal if songs are added
+                if (queue.length > 0) {
+                    hideEmptyQueueModal();
+                }
             });
 
-            // If nothing is playing and we have items, request next
-            if (!currentSong && queue.length > 0) {
-                socket.emit('request-next', currentRoomId);
+            socket.on('play-song', (song) => {
+                if (song) {
+                    currentSong = song;
+                    document.getElementById('current-title').innerText = song.title;
+                    document.getElementById('current-artist').innerText = song.author;
+                    player.loadVideoById(song.id);
+                    // Hide empty queue modal when song starts playing
+                    hideEmptyQueueModal();
+                } else {
+                    currentSong = null;
+                    document.getElementById('current-title').innerText = "Welcome to Karaoke";
+                    document.getElementById('current-artist').innerText = "Scan QR to start singing!";
+                    // Show empty queue modal when no songs left
+                    showEmptyQueueModal();
+                }
+            });
+
+            socket.on('force-skip', () => {
+                skipToNext();
+            });
+
+            socket.on('toggle-play', () => {
+                if (player) {
+                    if (isPlaying) player.pauseVideo();
+                    else player.playVideo();
+                }
+            });
+
+            socket.on('set-volume', (volume) => {
+                if (player) {
+                    player.setVolume(volume);
+                    document.getElementById('volume-range').value = volume;
+                }
+            });
+
+            function showScore() {
+                const score = Math.floor(Math.random() * 26) + 75; // 75-100
+                document.getElementById('final-score').innerText = score;
+                const overlay = document.getElementById('score-overlay');
+                overlay.style.display = 'flex';
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    socket.emit('request-next', currentRoomId);
+                }, 5000);
             }
-        });
 
-        socket.on('play-song', (song) => {
-            if (song) {
-                currentSong = song;
-                document.getElementById('current-title').innerText = song.title;
-                document.getElementById('current-artist').innerText = song.author;
-                player.loadVideoById(song.id);
-            } else {
-                currentSong = null;
-                document.getElementById('current-title').innerText = "Welcome to Karaoke";
-                document.getElementById('current-artist').innerText = "Scan QR to start singing!";
+            // Empty Queue Modal Functions
+            function showEmptyQueueModal() {
+                document.getElementById('empty-queue-modal').classList.add('active');
             }
-        });
 
-        socket.on('force-skip', () => {
-            socket.emit('request-next', currentRoomId);
-        });
-
-        socket.on('toggle-play', () => {
-            if (player) {
-                if (isPlaying) player.pauseVideo();
-                else player.playVideo();
+            function hideEmptyQueueModal() {
+                document.getElementById('empty-queue-modal').classList.remove('active');
             }
-        });
 
-        socket.on('set-volume', (volume) => {
-            if (player) {
-                player.setVolume(volume);
-                document.getElementById('volume-range').value = volume;
+            // Auto-hide controls after 5 seconds of no mouse movement (fullscreen only)
+            let hideControlsTimeout;
+            const playerControls = document.querySelector('.player-controls');
+            const fullscreenPlayer = document.querySelector('.fullscreen-player');
+
+            function isFullscreen() {
+                return !!(document.fullscreenElement || document.mozFullScreenElement ||
+                    document.webkitFullscreenElement || document.msFullscreenElement);
             }
-        });
 
-        function showScore() {
-            const score = Math.floor(Math.random() * 26) + 75; // 75-100
-            document.getElementById('final-score').innerText = score;
-            const overlay = document.getElementById('score-overlay');
-            overlay.style.display = 'flex';
-
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                socket.emit('request-next', currentRoomId);
-            }, 5000);
-        }
-
-        // Auto-hide controls after 5 seconds of no mouse movement (fullscreen only)
-        let hideControlsTimeout;
-        const playerControls = document.querySelector('.player-controls');
-        const fullscreenPlayer = document.querySelector('.fullscreen-player');
-
-        function isFullscreen() {
-            return !!(document.fullscreenElement || document.mozFullScreenElement ||
-                document.webkitFullscreenElement || document.msFullscreenElement);
-        }
-
-        function showControls() {
-            playerControls.classList.remove('hidden');
-            fullscreenPlayer.style.cursor = 'default';
-            clearTimeout(hideControlsTimeout);
-
-            // Only auto-hide in fullscreen mode
-            if (isFullscreen()) {
-                hideControlsTimeout = setTimeout(hideControls, 5000);
-            }
-        }
-
-        function hideControls() {
-            // Only hide in fullscreen mode
-            if (!isFullscreen()) {
+            function showControls() {
                 playerControls.classList.remove('hidden');
                 fullscreenPlayer.style.cursor = 'default';
-                return;
-            }
+                clearTimeout(hideControlsTimeout);
 
-            // Don't hide if a modal is open or side panel is active
-            const searchModal = document.getElementById('search-modal');
-            const remoteModal = document.getElementById('remote-modal');
-            const sidePanel = document.getElementById('side-panel');
-
-            if (searchModal.classList.contains('active') ||
-                remoteModal.classList.contains('active') ||
-                sidePanel.classList.contains('active')) {
-                return;
-            }
-
-            playerControls.classList.add('hidden');
-            fullscreenPlayer.style.cursor = 'none';
-        }
-
-        // Mouse move listener
-        fullscreenPlayer.addEventListener('mousemove', showControls);
-
-        // Keep controls visible when hovering over them
-        playerControls.addEventListener('mouseenter', () => {
-            clearTimeout(hideControlsTimeout);
-        });
-
-        playerControls.addEventListener('mouseleave', () => {
-            if (isFullscreen()) {
-                hideControlsTimeout = setTimeout(hideControls, 5000);
-            }
-        });
-
-        // Show controls when exiting fullscreen
-        document.addEventListener('fullscreenchange', () => {
-            if (!isFullscreen()) {
-                showControls();
-            }
-        });
-        document.addEventListener('webkitfullscreenchange', () => {
-            if (!isFullscreen()) {
-                showControls();
-            }
-        });
-
-        // Custom Confirm Modal Functions
-        function showConfirmModal(title, message, onConfirm) {
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-message').innerText = message;
-            document.getElementById('confirm-modal').classList.add('active');
-
-            const okBtn = document.getElementById('confirm-ok-btn');
-            okBtn.onclick = () => {
-                closeConfirmModal();
-                if (onConfirm) onConfirm();
-            };
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirm-modal').classList.remove('active');
-        }
-
-        // Reset room function with custom confirmation
-        function resetRoom() {
-            showConfirmModal(
-                'รีเซ็ตห้อง',
-                'คิวเพลงทั้งหมดจะถูกเคลียร์ คุณต้องการดำเนินการต่อหรือไม่?',
-                () => {
-                    socket.emit('clear-queue', currentRoomId);
-                    window.location.href = '/';
+                // Only auto-hide in fullscreen mode
+                if (isFullscreen()) {
+                    hideControlsTimeout = setTimeout(hideControls, 5000);
                 }
-            );
-        }
-    </script>
+            }
+
+            function hideControls() {
+                // Only hide in fullscreen mode
+                if (!isFullscreen()) {
+                    playerControls.classList.remove('hidden');
+                    fullscreenPlayer.style.cursor = 'default';
+                    return;
+                }
+
+                // Don't hide if a modal is open or side panel is active
+                const searchModal = document.getElementById('search-modal');
+                const remoteModal = document.getElementById('remote-modal');
+                const sidePanel = document.getElementById('side-panel');
+
+                if (searchModal.classList.contains('active') ||
+                    remoteModal.classList.contains('active') ||
+                    sidePanel.classList.contains('active')) {
+                    return;
+                }
+
+                playerControls.classList.add('hidden');
+                fullscreenPlayer.style.cursor = 'none';
+            }
+
+            // Mouse move listener
+            fullscreenPlayer.addEventListener('mousemove', showControls);
+
+            // Keep controls visible when hovering over them
+            playerControls.addEventListener('mouseenter', () => {
+                clearTimeout(hideControlsTimeout);
+            });
+
+            playerControls.addEventListener('mouseleave', () => {
+                if (isFullscreen()) {
+                    hideControlsTimeout = setTimeout(hideControls, 5000);
+                }
+            });
+
+            // Show controls when exiting fullscreen
+            document.addEventListener('fullscreenchange', () => {
+                if (!isFullscreen()) {
+                    showControls();
+                }
+            });
+            document.addEventListener('webkitfullscreenchange', () => {
+                if (!isFullscreen()) {
+                    showControls();
+                }
+            });
+
+            // Custom Confirm Modal Functions
+            function showConfirmModal(title, message, onConfirm) {
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-message').innerText = message;
+                document.getElementById('confirm-modal').classList.add('active');
+
+                const okBtn = document.getElementById('confirm-ok-btn');
+                okBtn.onclick = () => {
+                    closeConfirmModal();
+                    if (onConfirm) onConfirm();
+                };
+            }
+
+            function closeConfirmModal() {
+                document.getElementById('confirm-modal').classList.remove('active');
+            }
+
+            // Reset room function with custom confirmation
+            function resetRoom() {
+                showConfirmModal(
+                    'รีเซ็ตห้อง',
+                    'คิวเพลงทั้งหมดจะถูกเคลียร์ คุณต้องการดำเนินการต่อหรือไม่?',
+                    () => {
+                        socket.emit('clear-queue', currentRoomId);
+                        window.location.href = '/';
+                    }
+                );
+            }
+        </script>
 </body>
 
 </html>

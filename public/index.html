@@ -13,15 +13,21 @@
 
 <body class="landing-page">
     <nav class="navbar">
-        <div class="logo">Haekpak <span>.fun</span></div>
+        <div class="logo">DID <span>.fun</span></div>
         <div class="nav-buttons">
-            <a href="#" class="btn-nav-icon btn-donate-icon" title="สนับสนุน">
+            <!-- <a href="#" class="btn-nav-icon btn-donate-icon" title="สนับสนุน">
                 <span>💖</span>
-            </a>
+            </a> -->
+
+            <!-- <a href="#" class="btn-nav-icon btn-donate-icon" title="สนับสนุน">
+                <span>💖</span>
+            </a> -->
             <button class="btn-nav-icon btn-join-icon" onclick="openJoinModal()" title="เข้าร่วมห้อง">
+
                 <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                     <path
                         d="M3 11h2v2H3v-2zm4-4h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2zM3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5z" />
+
                 </svg>
             </button>
         </div>
@@ -38,11 +44,11 @@
                     <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
                 </svg>
             </div>
-            <p class="welcome-text">ยินดีต้อนรับ! <span class="heart-icon">❤️</span> <a href="#">สนับสนุนเว็บไซต์</a>
+            <p class="welcome-text">ยินดีต้อนรับ! <span class="heart-icon">❤️</span> <a href="#"></a>
             </p>
             <h1 class="main-title">ร้องคาราโอเกะ</h1>
             <h2 class="sub-title-gradient">ฟรี! ไม่เสียเงิน</h2>
-            <p class="subtitle">แหกปาก (Haekpak.fun) | ระบบสุดล้ำ | เพลงฮิตอัปเดตทุกวัน | ไม่ต้องโหลด</p>
+            <p class="subtitle"> ระบบสุดล้ำ | เพลงฮิตอัปเดตทุกวัน | ไม่ต้องโหลด</p>
 
             <div class="search-section">
                 <div class="search-filter-toggle landing-toggle">
@@ -58,7 +64,8 @@
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="m21 21-4.35-4.35"></path>
                     </svg>
-                    <input type="text" id="search-input" placeholder="ค้นหาเพลง ศิลปิน หรือรหัสเพลง...">
+                    <input type="text" id="search-input" placeholder="ค้นหาเพลง ศิลปิน หรือรหัสเพลง..."
+                        enterkeyhint="search">
                     <button class="btn-clear-input" id="clear-search-btn" onclick="clearSearchInput()"
                         style="display: none;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -181,7 +188,7 @@
             if (query.length >= 2) {
                 searchTimeout = setTimeout(() => {
                     performSearch();
-                }, 1500);
+                }, 2000);
             }
         });
 
@@ -197,7 +204,22 @@
             const resultsList = document.getElementById('results-list');
             const resultsCount = document.getElementById('results-count');
 
-            resultsList.innerHTML = '<div class="loading">กำลังค้นหา...</div>';
+            resultsList.innerHTML = `
+                <div class="search-loading">
+                    <div class="search-loading-notes">
+                        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                    </div>
+                    <div class="search-loading-spinner"></div>
+                    <div class="search-loading-text">
+                        กำลังค้นหา
+                        <div class="search-loading-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
             resultsContainer.style.display = 'block';
             features.style.display = 'none';
 
@@ -221,7 +243,16 @@
                         </div>
                     `;
                     card.onclick = () => {
-                        window.location.href = `host.html?add=${song.id}`;
+                        // Use both sessionStorage and URL parameter for mobile compatibility
+                        const songData = JSON.stringify(song);
+                        try {
+                            sessionStorage.setItem('pendingSong', songData);
+                        } catch (e) {
+                            console.warn('sessionStorage not available');
+                        }
+                        // Also pass encoded song data in URL as fallback
+                        const encodedSong = encodeURIComponent(songData);
+                        window.location.href = `host.html?song=${encodedSong}`;
                     };
                     resultsList.appendChild(card);
                 });
@@ -261,7 +292,16 @@
                         </div>
                     `;
                     card.onclick = () => {
-                        window.location.href = `host.html?add=${song.id}`;
+                        // Use both sessionStorage and URL parameter for mobile compatibility
+                        const songData = JSON.stringify(song);
+                        try {
+                            sessionStorage.setItem('pendingSong', songData);
+                        } catch (e) {
+                            console.warn('sessionStorage not available');
+                        }
+                        // Also pass encoded song data in URL as fallback
+                        const encodedSong = encodeURIComponent(songData);
+                        window.location.href = `host.html?song=${encodedSong}`;
                     };
                     resultsList.appendChild(card);
                 });
