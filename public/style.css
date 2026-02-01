@@ -4251,3 +4251,501 @@ body {
         font-size: 0.95rem;
     }
 }
+
+/* ========================================
+   Remote Page V2 - Now Playing Card Enhanced
+   ======================================== */
+.np-card-v2 {
+    background: linear-gradient(145deg, rgba(25, 25, 40, 0.98) 0%, rgba(15, 15, 25, 1) 100%);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.np-card-header {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.np-thumb-v2 {
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Empty state - red glow animation */
+.np-thumb-v2.empty-state {
+    border-color: rgba(255, 60, 60, 0.4);
+    animation: emptyThumbPulse 3s ease-in-out infinite;
+}
+
+@keyframes emptyThumbPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 60, 60, 0.2);
+        border-color: rgba(255, 60, 60, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 60, 60, 0.4);
+        border-color: rgba(255, 60, 60, 0.6);
+    }
+}
+
+.np-meta {
+    flex: 1;
+    overflow: hidden;
+}
+
+.np-meta h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.np-meta p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Empty state text animations */
+.np-meta.empty-state h3 {
+    background: linear-gradient(90deg, #ff6b6b, #ffa500, #ff6b6b);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textGradient 3s ease-in-out infinite;
+}
+
+.np-meta.empty-state p {
+    animation: textPulse 2s ease-in-out infinite;
+}
+
+@keyframes textGradient {
+
+    0%,
+    100% {
+        background-position: 0% center;
+    }
+
+    50% {
+        background-position: 100% center;
+    }
+}
+
+@keyframes textPulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: translateX(0);
+    }
+
+    50% {
+        opacity: 0.9;
+        transform: translateX(3px);
+    }
+}
+
+.np-progress-v2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.np-progress-v2 .time-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    min-width: 35px;
+    font-weight: 500;
+}
+
+.np-progress-v2 .progress-track {
+    flex: 1;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.np-progress-v2 .progress-fill-v2 {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color) 0%, #00c9ff 100%);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+}
+
+.np-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.btn-play-main {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color) 0%, #00c9ff 100%);
+    border: none;
+    color: #000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow:
+        0 4px 20px rgba(0, 242, 255, 0.4),
+        0 0 30px rgba(0, 242, 255, 0.2);
+}
+
+.btn-play-main:hover {
+    transform: scale(1.08);
+    box-shadow:
+        0 6px 25px rgba(0, 242, 255, 0.5),
+        0 0 40px rgba(0, 242, 255, 0.3);
+}
+
+.btn-play-main:active {
+    transform: scale(0.98);
+}
+
+.btn-skip {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-skip:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Connection Status Row with Share Button */
+.connection-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-share-small {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-share-small:hover {
+    background: rgba(0, 242, 255, 0.15);
+    border-color: rgba(0, 242, 255, 0.3);
+    color: var(--accent-color);
+}
+
+.btn-share-small svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Room Badge in Top Bar */
+.room-badge {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* Brand Info Layout */
+.brand-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.room-info {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+    padding-left: 24px;
+}
+
+.brand-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Search Results Header */
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.results-title {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.btn-toggle-results {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-toggle-results:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.btn-toggle-results svg {
+    transition: transform 0.3s ease;
+}
+
+/* Premium Share Modal Styles */
+.share-modal-premium {
+    background: linear-gradient(145deg, rgba(20, 20, 35, 0.98) 0%, rgba(10, 10, 20, 1) 100%);
+    border-radius: 24px;
+    padding: 0;
+    max-width: 380px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.share-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background: linear-gradient(90deg, rgba(255, 0, 150, 0.15) 0%, rgba(0, 242, 255, 0.15) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.share-modal-header h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+.btn-close-share {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-close-share:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.share-hint {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    padding: 15px 20px 5px;
+    margin: 0;
+}
+
+.qr-container-premium {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.qr-wrapper {
+    background: #fff;
+    padding: 15px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 242, 255, 0.2), 0 0 40px rgba(255, 0, 150, 0.1);
+}
+
+.qr-wrapper img {
+    display: block;
+}
+
+.room-badge-large {
+    margin-top: 15px;
+    background: linear-gradient(90deg, rgba(255, 0, 150, 0.2) 0%, rgba(0, 242, 255, 0.2) 100%);
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.room-badge-large span {
+    color: var(--accent-color);
+}
+
+.share-link-section {
+    padding: 0 25px 20px;
+}
+
+.share-link-section label {
+    display: block;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+
+.share-link-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.share-link-row input {
+    flex: 1;
+    min-width: 150px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: #fff;
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-copy-premium {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #00c9ff 100%);
+    border: none;
+    color: #000;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-copy-premium:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(0, 242, 255, 0.4);
+}
+
+.btn-close-full {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-close-full:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Mobile adjustments for share modal */
+@media (max-height: 700px) {
+    .share-modal-premium {
+        max-height: 95vh;
+    }
+
+    .qr-container-premium {
+        padding: 15px;
+    }
+
+    .qr-wrapper {
+        padding: 10px;
+    }
+
+    .share-modal-header {
+        padding: 15px 20px;
+    }
+
+    .share-hint {
+        padding: 10px 15px 5px;
+        font-size: 0.85rem;
+    }
+
+    .room-badge-large {
+        padding: 8px 20px;
+        font-size: 1rem;
+    }
+
+    .share-link-section {
+        padding: 0 20px 15px;
+    }
+
+    .btn-close-full {
+        padding: 15px;
+    }
+}

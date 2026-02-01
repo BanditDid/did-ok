@@ -16,36 +16,60 @@
 <body class="remote-page-v2">
     <!-- Top Brand Bar -->
     <div class="remote-brand-bar">
-        <div class="brand-logo">🎤 <span>Karaoke</span></div>
-        <button class="btn-share-icon" onclick="openShareModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                <polyline points="16,6 12,2 8,6"></polyline>
-                <line x1="12" y1="2" x2="12" y2="15"></line>
-            </svg>
-        </button>
+        <div class="brand-info">
+            <div class="brand-logo">🎤 <span>Karaoke Remote</span></div>
+            <div class="room-info" id="room-display">เลขห้อง: -</div>
+        </div>
+        <div class="brand-actions">
+            <button class="btn-share-icon" onclick="refreshSync()" title="รีเฟรชข้อมูล">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+                    <path d="M21 3v5h-5"></path>
+                </svg>
+            </button>
+            <button class="btn-share-icon" onclick="toggleFullscreen()" title="เต็มหน้าจอ">
+                <svg id="fullscreen-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    width="20" height="20">
+                    <path
+                        d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                    </path>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <div class="remote-main-content">
         <!-- Title & Status -->
         <div class="remote-title-section">
-            <h1>DID Remote</h1>
             <p class="user-display" onclick="showNameModal()" style="cursor: pointer;">
                 ผู้ใช้งาน: <span id="user-name-display">-</span> ✏️
             </p>
-            <div class="connection-badge">
-                <span class="dot"></span>
-                <span>เชื่อมต่อแล้ว</span>
+            <div class="connection-status-row">
+                <div class="connection-badge">
+                    <span class="dot"></span>
+                    <span>เชื่อมต่อแล้ว</span>
+                </div>
+                <button class="btn-share-small" onclick="openShareModal()" title="แชร์รีโมท">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                        <polyline points="16,6 12,2 8,6"></polyline>
+                        <line x1="12" y1="2" x2="12" y2="15"></line>
+                    </svg>
+                </button>
             </div>
         </div>
 
         <!-- Now Playing Card -->
         <div class="np-card-v2">
             <div class="np-card-header">
-                <img id="np-thumb" src="https://via.placeholder.com/80x80" class="np-thumb-v2">
-                <div class="np-meta">
-                    <h3 id="np-title">Welcome to Karaoke</h3>
-                    <p id="np-artist">Ready to sing!</p>
+                <div id="np-thumb-container" class="np-thumb-container">
+                    <img id="np-thumb"
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%231a1a2e' width='80' height='80'/%3E%3Ccircle cx='40' cy='40' r='25' fill='none' stroke='%23ff3c3c' stroke-width='2' opacity='0.5'/%3E%3Cpath d='M35 30v20l15-10z' fill='%23ff3c3c' opacity='0.6'/%3E%3C/svg%3E"
+                        class="np-thumb-v2 empty-state">
+                </div>
+                <div class="np-meta empty-state">
+                    <h3 id="np-title">ไม่มีเพลงในคิว</h3>
+                    <p id="np-artist">เพิ่มเพลงเพื่อเล่น 🎵</p>
                 </div>
             </div>
             <div class="np-progress-v2">
@@ -92,7 +116,8 @@
                 </label>
             </div>
             <div class="search-box-v2">
-                <input type="text" id="remote-search-input" placeholder="ค้นหาเพลง..." enterkeyhint="search">
+                <input type="text" id="remote-search-input" placeholder="ค้นหาเพลง..." enterkeyhint="search"
+                    autocomplete="off">
                 <button class="btn-clear-search" id="clear-remote-search-btn" onclick="clearRemoteSearchInput()"
                     style="display: none;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16"
@@ -103,6 +128,15 @@
                 </button>
             </div>
             <div id="remote-results-overlay" class="results-overlay-v2">
+                <div class="results-header" id="results-header">
+                    <span class="results-title">ผลการค้นหา (<span id="results-count">0</span>)</span>
+                    <button class="btn-toggle-results" onclick="toggleSearchResults()" title="ยุบ/ขยาย">
+                        <svg id="toggle-results-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" width="18" height="18">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </button>
+                </div>
                 <div id="remote-results-list" class="results-list-v2"></div>
             </div>
         </div>
@@ -124,42 +158,42 @@
 
     <!-- Share Modal -->
     <div id="share-modal" class="search-modal">
-        <div class="modal-content remote-modal-content">
-            <div class="modal-header">
-                <h3>แชร์รีโมท</h3>
-                <button class="btn-close" onclick="closeShareModal()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"
-                        stroke-linejoin="round" width="20" height="20">
+        <div class="modal-content share-modal-premium">
+            <div class="share-modal-header">
+                <h3>🎤 แชร์รีโมท</h3>
+                <button class="btn-close-share" onclick="closeShareModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
             </div>
 
-            <p class="remote-hint">แชร์ QR Code หรือลิงก์เพื่อให้เพื่อนร่วมร้องเพลง!</p>
+            <p class="share-hint">สแกน QR Code เพื่อเข้าร่วมคาราโอเกะ!</p>
 
-            <div class="remote-qr-container">
-                <div id="share-qrcode"></div>
-            </div>
-
-            <div class="remote-info-grid">
-                <div class="info-item">
-                    <label>รหัสห้อง</label>
-                    <span id="share-room-id" class="neon-text-cyan">------</span>
+            <div class="qr-container-premium">
+                <div class="qr-wrapper">
+                    <div id="share-qrcode"></div>
                 </div>
+                <div class="room-badge-large">ห้อง: <span id="share-room-id">------</span></div>
             </div>
 
-            <div class="remote-link-section">
+            <div class="share-link-section">
                 <label>ลิงก์เข้าห้อง</label>
-                <div class="link-input-group">
+                <div class="share-link-row">
                     <input type="text" id="share-link-input" readonly value="">
-                    <button class="btn-copy-link" onclick="copyShareLink()">คัดลอก</button>
+                    <button class="btn-copy-premium" onclick="copyShareLink()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
+                            height="18">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        คัดลอก
+                    </button>
                 </div>
             </div>
 
-            <div class="remote-modal-footer">
-                <button class="btn-footer-gray" onclick="closeShareModal()">ปิด</button>
-            </div>
+            <button class="btn-close-full" onclick="closeShareModal()">ปิด</button>
         </div>
     </div>
 
@@ -199,10 +233,56 @@
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('room');
 
+        // Display room ID in the top bar
+        if (roomId) {
+            const roomDisplay = document.getElementById('room-display');
+            if (roomDisplay) roomDisplay.innerText = 'เลขห้อง: ' + roomId;
+        }
+
         let isPlaying = false;
         let userName = localStorage.getItem('remoteUserName') || '';
         let shareQRGenerated = false;
         let currentQueueRemote = [];
+
+        // Fullscreen Functions
+        function toggleFullscreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+            const icon = document.getElementById('fullscreen-icon');
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                if (requestFullScreen) requestFullScreen.call(docEl);
+                if (icon) icon.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
+            } else {
+                if (cancelFullScreen) cancelFullScreen.call(doc);
+                if (icon) icon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+            }
+        }
+
+        // Auto fullscreen on mobile (requires user interaction)
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Refresh sync function - request data sync from server
+        function refreshSync() {
+            if (roomId) {
+                socket.emit('request-sync', roomId);
+                showToast('กำลังซิงค์ข้อมูล...');
+            }
+        }
+
+        // Listen for fullscreen changes to update icon
+        document.addEventListener('fullscreenchange', () => {
+            const icon = document.getElementById('fullscreen-icon');
+            if (document.fullscreenElement) {
+                if (icon) icon.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
+            } else {
+                if (icon) icon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+            }
+        });
 
         // Share Modal Functions
         function openShareModal() {
@@ -214,13 +294,15 @@
                 const remoteUrl = `${window.location.origin}/remote.html?room=${roomId}`;
                 const qrContainer = document.getElementById('share-qrcode');
                 qrContainer.innerHTML = '';
+                // Adjust QR size based on screen height
+                const qrSize = window.innerHeight < 700 ? 180 : 220;
                 new QRCode(qrContainer, {
                     text: remoteUrl,
-                    width: 200,
-                    height: 200,
+                    width: qrSize,
+                    height: qrSize,
                     colorDark: "#000000",
                     colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.L
+                    correctLevel: QRCode.CorrectLevel.M
                 });
 
                 document.getElementById('share-room-id').innerText = roomId;
@@ -441,15 +523,20 @@
             const title = document.getElementById('np-title');
             const artist = document.getElementById('np-artist');
             const thumb = document.getElementById('np-thumb');
+            const meta = thumb.closest('.np-card-header').querySelector('.np-meta');
 
             if (song) {
                 title.innerText = song.title;
                 artist.innerText = song.author;
                 thumb.src = song.thumbnail;
+                thumb.classList.remove('empty-state');
+                if (meta) meta.classList.remove('empty-state');
             } else {
-                title.innerText = "Welcome to Karaoke";
-                artist.innerText = "Ready to sing? Scan QR or Add song!";
-                thumb.src = "https://via.placeholder.com/120x68";
+                title.innerText = "ไม่มีเพลงในคิว";
+                artist.innerText = "เพิ่มเพลงเพื่อเล่น 🎵";
+                thumb.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%231a1a2e' width='80' height='80'/%3E%3Ccircle cx='40' cy='40' r='25' fill='none' stroke='%23ff3c3c' stroke-width='2' opacity='0.5'/%3E%3Cpath d='M35 30v20l15-10z' fill='%23ff3c3c' opacity='0.6'/%3E%3C/svg%3E";
+                thumb.classList.add('empty-state');
+                if (meta) meta.classList.add('empty-state');
             }
         }
 
@@ -488,10 +575,26 @@
         let searchTimeout;
         let currentSearchQuery = '';
         let currentSearchPage = 1;
+        let isResultsCollapsed = false;
         const searchInput = document.getElementById('remote-search-input');
         const clearRemoteSearchBtnEl = document.getElementById('clear-remote-search-btn');
         const resultsOverlay = document.getElementById('remote-results-overlay');
         const resultsList = document.getElementById('remote-results-list');
+
+        // Toggle search results collapse/expand
+        function toggleSearchResults() {
+            isResultsCollapsed = !isResultsCollapsed;
+            const resultsList = document.getElementById('remote-results-list');
+            const icon = document.getElementById('toggle-results-icon');
+
+            if (isResultsCollapsed) {
+                resultsList.style.display = 'none';
+                icon.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>';
+            } else {
+                resultsList.style.display = 'block';
+                icon.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>';
+            }
+        }
 
         function clearRemoteSearchInput() {
             searchInput.value = '';
@@ -500,9 +603,8 @@
             searchInput.focus();
         }
 
-        // Toggle switch listener - focus input and re-search
+        // Toggle switch listener - re-search without focusing input
         document.getElementById('remote-karaoke-filter-toggle').addEventListener('change', async () => {
-            searchInput.focus();
             const query = searchInput.value.trim();
             if (query.length >= 2) {
                 resultsOverlay.classList.add('active');
@@ -531,6 +633,46 @@
                     displaySearchCard(songs, false);
                 } catch (err) {
                     resultsList.innerHTML = '<div class="error">ค้นหาล้มเหลว</div>';
+                }
+            }
+        });
+
+        // Handle Enter/Search key on mobile - trigger search and hide keyboard
+        searchInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchInput.blur(); // Hide keyboard on mobile
+
+                const query = searchInput.value.trim();
+                if (query.length >= 1) {
+                    clearTimeout(searchTimeout);
+                    resultsOverlay.classList.add('active');
+                    resultsList.innerHTML = `
+                        <div class="search-loading">
+                            <div class="search-loading-notes">
+                                <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                                <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                                <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                            </div>
+                            <div class="search-loading-spinner"></div>
+                            <div class="search-loading-text">
+                                กำลังค้นหา
+                                <div class="search-loading-dots">
+                                    <span></span><span></span><span></span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    currentSearchQuery = query;
+                    currentSearchPage = 1;
+                    try {
+                        const karaokeOnly = document.getElementById('remote-karaoke-filter-toggle').checked;
+                        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&page=1&karaokeOnly=${karaokeOnly}`);
+                        const songs = await res.json();
+                        displaySearchCard(songs, false);
+                    } catch (err) {
+                        resultsList.innerHTML = '<div class="error">ค้นหาล้มเหลว</div>';
+                    }
                 }
             }
         });
@@ -597,8 +739,14 @@
             const oldBtn = document.querySelector('.btn-load-more-remote');
             if (oldBtn) oldBtn.remove();
 
+            // Update results count
+            const existingCount = append ? resultsList.querySelectorAll('.remote-song-card').length : 0;
+            const totalCount = existingCount + songs.length;
+            document.getElementById('results-count').innerText = totalCount;
+
             if (!append && songs.length === 0) {
                 resultsList.innerHTML = '<div class="empty">ไม่พบเพลง</div>';
+                document.getElementById('results-count').innerText = '0';
                 return;
             }
 
