@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>Did.OK | KARAOKE Player</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Prompt:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .mobile-player-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a14 0%, #1a1a2e 50%, #0a0a14 100%);
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .player-logo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .player-logo span {
+            color: var(--accent-color);
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .play-overlay.hidden {
+            display: none;
+        }
+
+        .play-btn-large {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-color) 0%, #00c9ff 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        .play-btn-large svg {
+            fill: #000;
+            margin-left: 5px;
+        }
+
+        .tap-hint {
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 15px;
+            font-size: 1rem;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 40px rgba(0, 242, 255, 0.4);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 60px rgba(0, 242, 255, 0.6);
+            }
+        }
+
+        .song-info-bar {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .song-info-bar h2 {
+            font-size: 1rem;
+            color: #fff;
+            margin: 0 0 5px 0;
+            font-weight: 600;
+        }
+
+        .song-info-bar p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0;
+        }
+
+        .player-controls-mobile {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .ctrl-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .ctrl-btn:hover,
+        .ctrl-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .ctrl-btn.primary {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent-color) 0%, #00c9ff 100%);
+            color: #000;
+        }
+
+        .queue-section-mobile {
+            flex: 1;
+            padding: 15px 20px;
+            overflow-y: auto;
+        }
+
+        .queue-header-mobile {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .queue-header-mobile h3 {
+            font-size: 1rem;
+            color: #fff;
+            margin: 0;
+        }
+
+        .queue-count {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .queue-list-mobile {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .queue-item-mobile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .queue-item-mobile img {
+            width: 50px;
+            height: 38px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .queue-item-mobile .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .queue-item-mobile .info h4 {
+            font-size: 0.85rem;
+            color: #fff;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .queue-item-mobile .info p {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 3px 0 0;
+        }
+
+        .empty-queue {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .connection-status .dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body class="mobile-player-page">
+    <header class="player-header">
+        <div class="player-logo">Did.OK <span>KARAOKE</span></div>
+        <div class="connection-status">
+            <span class="dot"></span>
+            <span id="room-status">ห้อง: -</span>
+        </div>
+    </header>
+
+    <div class="video-container">
+        <div id="play-overlay" class="play-overlay" onclick="startPlayback()">
+            <div class="play-btn-large">
+                <svg viewBox="0 0 24 24" width="40" height="40">
+                    <path d="M8 5v14l11-7z" />
+                </svg>
+            </div>
+            <p class="tap-hint">แตะเพื่อเล่น</p>
+        </div>
+        <iframe id="youtube-player" src=""
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="song-info-bar">
+        <h2 id="current-title">ไม่มีเพลง</h2>
+        <p id="current-artist">เลือกเพลงจากคิวเพื่อเล่น</p>
+    </div>
+
+    <div class="player-controls-mobile">
+        <button class="ctrl-btn" onclick="skipSong()" title="ข้ามเพลง">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+            </svg>
+        </button>
+        <button class="ctrl-btn primary" id="play-pause-btn" onclick="togglePlayPause()">
+            <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                <path d="M8 5v14l11-7z" />
+            </svg>
+        </button>
+        <button class="ctrl-btn" onclick="goHome()" title="กลับหน้าหลัก">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+            </svg>
+        </button>
+    </div>
+
+    <div class="queue-section-mobile">
+        <div class="queue-header-mobile">
+            <h3>คิวเพลง</h3>
+            <span class="queue-count" id="queue-count">0 เพลง</span>
+        </div>
+        <div class="queue-list-mobile" id="queue-list">
+            <div class="empty-queue">ไม่มีเพลงในคิว</div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let roomId = null;
+        let currentSong = null;
+        let isPlaying = false;
+        let queue = [];
+        let playerStarted = false;
+
+        // Get song from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const songParam = urlParams.get('song');
+        const roomParam = urlParams.get('room');
+
+        // Generate room ID
+        function generateRoomId() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        // Initialize
+        function init() {
+            roomId = roomParam || generateRoomId();
+            document.getElementById('room-status').innerText = 'ห้อง: ' + roomId;
+
+            // Join room via socket
+            socket.emit('join-room', roomId);
+
+            // If song was passed, add to queue and prepare
+            if (songParam) {
+                try {
+                    const song = JSON.parse(decodeURIComponent(songParam));
+                    currentSong = song;
+                    updateSongInfo(song);
+                    prepareVideo(song.videoId);
+                    queue.push(song);
+                    updateQueueUI();
+                } catch (e) {
+                    console.error('Failed to parse song data', e);
+                }
+            }
+        }
+
+        function prepareVideo(videoId) {
+            // Prepare iframe but don't autoplay
+            const iframe = document.getElementById('youtube-player');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1`;
+        }
+
+        function startPlayback() {
+            if (!currentSong) return;
+
+            const overlay = document.getElementById('play-overlay');
+            overlay.classList.add('hidden');
+
+            // Start playing with autoplay
+            const iframe = document.getElementById('youtube-player');
+            iframe.src = `https://www.youtube.com/embed/${currentSong.videoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`;
+
+            playerStarted = true;
+            isPlaying = true;
+            updatePlayPauseIcon();
+
+            // Notify remotes
+            socket.emit('play', roomId);
+        }
+
+        function updateSongInfo(song) {
+            document.getElementById('current-title').innerText = song.title || 'ไม่มีเพลง';
+            document.getElementById('current-artist').innerText = song.author || '-';
+        }
+
+        function updatePlayPauseIcon() {
+            const icon = document.getElementById('play-icon');
+            if (isPlaying) {
+                icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+            } else {
+                icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+            }
+        }
+
+        function togglePlayPause() {
+            if (!playerStarted) {
+                startPlayback();
+                return;
+            }
+
+            isPlaying = !isPlaying;
+            updatePlayPauseIcon();
+
+            // Note: Can't directly control YouTube iframe playback without IFrame API
+            // This is a visual toggle only for mobile
+            socket.emit(isPlaying ? 'play' : 'pause', roomId);
+        }
+
+        function skipSong() {
+            if (queue.length > 1) {
+                queue.shift();
+                currentSong = queue[0];
+                updateSongInfo(currentSong);
+                prepareVideo(currentSong.videoId);
+
+                // Show overlay again for new song
+                document.getElementById('play-overlay').classList.remove('hidden');
+                playerStarted = false;
+                isPlaying = false;
+                updatePlayPauseIcon();
+                updateQueueUI();
+
+                socket.emit('skip-song', roomId);
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        function updateQueueUI() {
+            const queueList = document.getElementById('queue-list');
+            const countEl = document.getElementById('queue-count');
+
+            countEl.innerText = queue.length + ' เพลง';
+
+            if (queue.length === 0) {
+                queueList.innerHTML = '<div class="empty-queue">ไม่มีเพลงในคิว</div>';
+                return;
+            }
+
+            queueList.innerHTML = queue.map((song, index) => `
+                <div class="queue-item-mobile ${index === 0 ? 'playing' : ''}">
+                    <img src="${song.thumbnail}" alt="">
+                    <div class="info">
+                        <h4>${song.title}</h4>
+                        <p>${song.author}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Socket events
+        socket.on('queue-updated', (newQueue) => {
+            queue = newQueue;
+            if (queue.length > 0 && !currentSong) {
+                currentSong = queue[0];
+                updateSongInfo(currentSong);
+                prepareVideo(currentSong.videoId);
+            }
+            updateQueueUI();
+        });
+
+        socket.on('song-added', (song) => {
+            queue.push(song);
+            if (!currentSong) {
+                currentSong = song;
+                updateSongInfo(song);
+                prepareVideo(song.videoId);
+            }
+            updateQueueUI();
+        });
+
+        socket.on('play', () => {
+            isPlaying = true;
+            updatePlayPauseIcon();
+        });
+
+        socket.on('pause', () => {
+            isPlaying = false;
+            updatePlayPauseIcon();
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+
+</html>

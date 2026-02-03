@@ -763,6 +763,11 @@
                 const query = document.getElementById('modal-search-input').value;
                 if (!query) return;
 
+                // Hide keyboard on mobile
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
+
                 const resultsList = document.getElementById('modal-results-list');
                 resultsList.innerHTML = `
                     <div class="search-loading">
