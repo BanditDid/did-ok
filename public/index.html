@@ -181,16 +181,7 @@
             }
         });
 
-        // Auto-search logic
-        searchInputEl.addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            const query = e.target.value.trim();
-            if (query.length >= 2) {
-                searchTimeout = setTimeout(() => {
-                    performSearch();
-                }, 2000);
-            }
-        });
+
 
         async function performSearch() {
             const query = document.getElementById('search-input').value;

@@ -126,6 +126,7 @@
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
+                <button class="btn-search-v2" onclick="performRemoteSearch()">ค้นหา</button>
             </div>
             <div id="remote-results-overlay" class="results-overlay-v2">
                 <div class="results-header" id="results-header">
@@ -603,119 +604,59 @@
             searchInput.focus();
         }
 
-        // Toggle switch listener - re-search without focusing input
+        // Toggle switch listener - focus back to input but don't auto search
         document.getElementById('remote-karaoke-filter-toggle').addEventListener('change', async () => {
-            const query = searchInput.value.trim();
-            if (query.length >= 2) {
-                resultsOverlay.classList.add('active');
-                resultsList.innerHTML = `
-                    <div class="search-loading">
-                        <div class="search-loading-notes">
-                            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                        </div>
-                        <div class="search-loading-spinner"></div>
-                        <div class="search-loading-text">
-                            กำลังค้นหา
-                            <div class="search-loading-dots">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                currentSearchQuery = query;
-                currentSearchPage = 1;
-                try {
-                    const karaokeOnly = document.getElementById('remote-karaoke-filter-toggle').checked;
-                    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&page=1&karaokeOnly=${karaokeOnly}`);
-                    const songs = await res.json();
-                    displaySearchCard(songs, false);
-                } catch (err) {
-                    resultsList.innerHTML = '<div class="error">ค้นหาล้มเหลว</div>';
-                }
-            }
+            searchInput.focus();
         });
 
         // Handle Enter/Search key on mobile - trigger search and hide keyboard
         searchInput.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                searchInput.blur(); // Hide keyboard on mobile
-
-                const query = searchInput.value.trim();
-                if (query.length >= 1) {
-                    clearTimeout(searchTimeout);
-                    resultsOverlay.classList.add('active');
-                    resultsList.innerHTML = `
-                        <div class="search-loading">
-                            <div class="search-loading-notes">
-                                <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                                <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                                <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                            </div>
-                            <div class="search-loading-spinner"></div>
-                            <div class="search-loading-text">
-                                กำลังค้นหา
-                                <div class="search-loading-dots">
-                                    <span></span><span></span><span></span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    currentSearchQuery = query;
-                    currentSearchPage = 1;
-                    try {
-                        const karaokeOnly = document.getElementById('remote-karaoke-filter-toggle').checked;
-                        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&page=1&karaokeOnly=${karaokeOnly}`);
-                        const songs = await res.json();
-                        displaySearchCard(songs, false);
-                    } catch (err) {
-                        resultsList.innerHTML = '<div class="error">ค้นหาล้มเหลว</div>';
-                    }
-                }
+                performRemoteSearch();
             }
         });
 
         searchInput.addEventListener('input', () => {
             clearRemoteSearchBtnEl.style.display = searchInput.value.length > 0 ? 'flex' : 'none';
-            clearTimeout(searchTimeout);
-            const query = searchInput.value;
-            if (query.length < 2) {
+        });
+
+        async function performRemoteSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 1) {
                 resultsOverlay.classList.remove('active');
                 return;
             }
 
-            searchTimeout = setTimeout(async () => {
-                resultsOverlay.classList.add('active');
-                resultsList.innerHTML = `
-                    <div class="search-loading">
-                        <div class="search-loading-notes">
-                            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                        </div>
-                        <div class="search-loading-spinner"></div>
-                        <div class="search-loading-text">
-                            กำลังค้นหา
-                            <div class="search-loading-dots">
-                                <span></span><span></span><span></span>
-                            </div>
+            searchInput.blur(); // Hide keyboard on mobile
+            resultsOverlay.classList.add('active');
+            resultsList.innerHTML = `
+                <div class="search-loading">
+                    <div class="search-loading-notes">
+                        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                    </div>
+                    <div class="search-loading-spinner"></div>
+                    <div class="search-loading-text">
+                        กำลังค้นหา
+                        <div class="search-loading-dots">
+                            <span></span><span></span><span></span>
                         </div>
                     </div>
-                `;
-                currentSearchQuery = query;
-                currentSearchPage = 1;
-                try {
-                    const karaokeOnly = document.getElementById('remote-karaoke-filter-toggle').checked;
-                    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&page=1&karaokeOnly=${karaokeOnly}`);
-                    const songs = await res.json();
-                    displaySearchCard(songs, false);
-                } catch (err) {
-                    resultsList.innerHTML = '<div class="error">ค้นหาล้มเหลว</div>';
-                }
-            }, 500);
-        });
+                </div>
+            `;
+            currentSearchQuery = query;
+            currentSearchPage = 1;
+            try {
+                const karaokeOnly = document.getElementById('remote-karaoke-filter-toggle').checked;
+                const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&page=1&karaokeOnly=${karaokeOnly}`);
+                const songs = await res.json();
+                displaySearchCard(songs, false);
+            } catch (err) {
+                resultsList.innerHTML = '<div class="error">ค้นหาล้มเหลว</div>';
+            }
+        }
 
         async function loadMoreSearch() {
             currentSearchPage++;

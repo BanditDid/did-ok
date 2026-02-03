@@ -2985,7 +2985,31 @@ body {
     cursor: pointer;
     padding: 6px;
     display: flex;
+    margin-right: 4px;
 }
+
+.btn-search-v2 {
+    background: var(--accent-color);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 6px 0;
+}
+
+.btn-search-v2:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}
+
+.btn-search-v2:active {
+    transform: scale(0.98);
+}
+
 
 /* Results V2 */
 .results-overlay-v2 {
