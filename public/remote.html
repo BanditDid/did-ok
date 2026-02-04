@@ -11,6 +11,209 @@
         rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Toast Notification - Modern Style */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.98));
+            color: #fff;
+            padding: 14px 24px 14px 18px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            max-width: calc(100vw - 40px);
+            min-width: 200px;
+            text-align: left;
+            font-family: 'Prompt', 'Inter', sans-serif;
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: toast-icon-pop 0.4s ease 0.2s both;
+        }
+
+        @keyframes toast-icon-pop {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .toast.toast-success .toast-icon {
+            background: linear-gradient(135deg, #00d68f, #00b887);
+            box-shadow: 0 4px 15px rgba(0, 214, 143, 0.4);
+        }
+
+        .toast.toast-error .toast-icon {
+            background: linear-gradient(135deg, #ff4d6d, #ff3366);
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
+        }
+
+        .toast.toast-warning .toast-icon {
+            background: linear-gradient(135deg, #ffbe0b, #fb8500);
+            box-shadow: 0 4px 15px rgba(255, 190, 11, 0.4);
+        }
+
+        .toast.toast-info .toast-icon {
+            background: linear-gradient(135deg, #00b4d8, #0096c7);
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);
+        }
+
+        .toast-icon svg {
+            width: 16px;
+            height: 16px;
+            stroke: white;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toast-message {
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            right: 16px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .toast-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00d68f, #00b4d8);
+            border-radius: 3px;
+            animation: toast-progress 3s linear forwards;
+        }
+
+        @keyframes toast-progress {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .toast {
+                bottom: 90px;
+                left: 20px;
+                right: 20px;
+                transform: translateX(0) translateY(100px);
+                max-width: none;
+                padding: 16px 20px 16px 16px;
+                border-radius: 14px;
+                font-size: 14px;
+            }
+
+            .toast.show {
+                transform: translateX(0) translateY(0);
+            }
+
+            .toast-icon {
+                width: 26px;
+                height: 26px;
+            }
+
+            .toast-icon svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .toast {
+                bottom: calc(100px + env(safe-area-inset-bottom));
+            }
+
+            @media (max-width: 768px) {
+                .toast {
+                    bottom: calc(90px + env(safe-area-inset-bottom));
+                }
+            }
+        }
+
+        .toast.slide-out {
+            animation: slideOut 0.3s ease forwards;
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(100px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .toast.slide-out {
+                animation: slideOutMobile 0.3s ease forwards;
+            }
+
+            @keyframes slideOutMobile {
+                from {
+                    opacity: 1;
+                    transform: translateX(0) translateY(0);
+                }
+
+                to {
+                    opacity: 0;
+                    transform: translateX(0) translateY(100px);
+                }
+            }
+        }
+    </style>
 </head>
 
 <body class="remote-page-v2">
@@ -271,7 +474,7 @@
         function refreshSync() {
             if (roomId) {
                 socket.emit('request-sync', roomId);
-                showToast('กำลังซิงค์ข้อมูล...');
+                showToast('กำลังซิงค์ข้อมูล...', 'info');
             }
         }
 
@@ -320,7 +523,7 @@
             const linkInput = document.getElementById('share-link-input');
             linkInput.select();
             document.execCommand('copy');
-            showToast('คัดลอกลิงก์แล้ว!');
+            showToast('คัดลอกลิงก์แล้ว', 'success');
         }
 
         // Show name modal
@@ -376,7 +579,7 @@
         // Skip song with confirmation
         function confirmSkipSong() {
             if (currentQueueRemote.length === 0) {
-                showToast('ไม่มีเพลงในคิว');
+                showToast('ไม่มีเพลงในคิว', 'warning');
                 return;
             }
             showConfirmModal(
@@ -509,7 +712,7 @@
         // Handle song error notifications
         socket.on('song-error', ({ songTitle, reason }) => {
             console.log('Song error:', songTitle, reason);
-            showErrorToast(`เล่นไม่ได้: ${songTitle.substring(0, 30)}...`, reason);
+            showToast(`เล่นไม่ได้: ${songTitle.substring(0, 25)}...`, 'error', 5000);
         });
 
         // Periodic sync every 5 seconds to ensure data consistency
@@ -604,9 +807,11 @@
             searchInput.focus();
         }
 
-        // Toggle switch listener - focus back to input but don't auto search
+        // Toggle switch listener - re-trigger search if query exists, but don't focus
         document.getElementById('remote-karaoke-filter-toggle').addEventListener('change', async () => {
-            searchInput.focus();
+            if (searchInput.value.trim().length >= 1) {
+                performRemoteSearch();
+            }
         });
 
         // Handle Enter/Search key on mobile - trigger search and hide keyboard
@@ -717,7 +922,7 @@
                     btn.disabled = true;
 
                     // Show toast
-                    showToast(`เพิ่ม "${song.title.substring(0, 30)}..." ลงคิวแล้ว`);
+                    showToast(`เพิ่ม "${song.title.substring(0, 25)}..." ลงคิวแล้ว`, 'success');
 
                     // Reset button after 1.5 seconds
                     setTimeout(() => {
@@ -740,7 +945,8 @@
 
         // Close results when clicking outside
         document.addEventListener('click', (e) => {
-            if (!searchInput.contains(e.target) && !resultsOverlay.contains(e.target)) {
+            const searchBtn = document.querySelector('.btn-search-v2');
+            if (!searchInput.contains(e.target) && !resultsOverlay.contains(e.target) && (searchBtn && !searchBtn.contains(e.target))) {
                 resultsOverlay.classList.remove('active');
             }
         });
@@ -780,6 +986,7 @@
 
         window.removeSpecificRemote = (index) => {
             socket.emit('remove-from-queue', { roomId, index });
+            showToast('ลบเพลงออกจากคิวแล้ว', 'info');
         };
 
         socket.on('play-song', (song) => {
@@ -815,25 +1022,109 @@
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // Toast notification function
-        function showToast(message) {
+        // ==================== TOAST SYSTEM ====================
+        const TOAST_ICONS = {
+            success: `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            error: `<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+            warning: `<svg viewBox="0 0 24 24"><path d="M12 9v4"></path><circle cx="12" cy="16" r="0.5" fill="white"></circle></svg>`,
+            info: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" fill="white"></circle><path d="M12 16v-3"></path></svg>`
+        };
+
+        let currentToastTimeout = null;
+
+        function showToast(message, type = 'success', duration = 3000) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+
+            if (currentToastTimeout) {
+                clearTimeout(currentToastTimeout);
+            }
+
+            toast.classList.remove('show', 'slide-out', 'toast-success', 'toast-error', 'toast-warning', 'toast-info');
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    ${TOAST_ICONS[type] || TOAST_ICONS.success}
+                </div>
+                <div class="toast-content">
+                    <span class="toast-message">${message}</span>
+                </div>
+                <div class="toast-progress">
+                    <div class="toast-progress-bar" style="animation-duration: ${duration}ms"></div>
+                </div>
+            `;
+
+            toast.classList.add(`toast-${type}`);
+            void toast.offsetWidth;
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500);
+
+            currentToastTimeout = setTimeout(() => {
+                hideToast();
+            }, duration);
+
+            setupSwipeToDismiss(toast);
         }
 
-        // Error toast for song playback errors
-        function showErrorToast(title, reason) {
+        function hideToast() {
             const toast = document.getElementById('toast');
-            toast.innerHTML = `<strong style="color:#ff6b6b;">⚠️ ${title}</strong><br><small>${reason}</small>`;
-            toast.classList.add('show', 'error');
+            toast.classList.remove('show');
+            toast.classList.add('slide-out');
+
             setTimeout(() => {
-                toast.classList.remove('show', 'error');
-            }, 4000);
+                toast.classList.remove('slide-out');
+            }, 300);
+
+            if (currentToastTimeout) {
+                clearTimeout(currentToastTimeout);
+                currentToastTimeout = null;
+            }
         }
+
+        function setupSwipeToDismiss(toast) {
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+
+            const onTouchStart = (e) => {
+                startY = e.touches[0].clientY;
+                isDragging = true;
+                toast.style.transition = 'none';
+            };
+
+            const onTouchMove = (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const diff = currentY - startY;
+                if (diff > 0) {
+                    toast.style.transform = window.innerWidth <= 768
+                        ? `translateX(0) translateY(${diff}px)`
+                        : `translateX(-50%) translateY(${diff}px)`;
+                    toast.style.opacity = Math.max(0, 1 - diff / 100);
+                }
+            };
+
+            const onTouchEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                const diff = currentY - startY;
+                toast.style.transition = '';
+
+                if (diff > 50) {
+                    hideToast();
+                } else {
+                    toast.style.transform = '';
+                    toast.style.opacity = '';
+                }
+            };
+
+            toast.removeEventListener('touchstart', onTouchStart);
+            toast.removeEventListener('touchmove', onTouchMove);
+            toast.removeEventListener('touchend', onTouchEnd);
+
+            toast.addEventListener('touchstart', onTouchStart, { passive: true });
+            toast.addEventListener('touchmove', onTouchMove, { passive: true });
+            toast.addEventListener('touchend', onTouchEnd, { passive: true });
+        }
+        // ==================== END TOAST SYSTEM ====================
     </script>
 </body>
 
