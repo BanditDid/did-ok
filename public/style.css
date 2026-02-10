@@ -1249,6 +1249,24 @@ body {
     -webkit-text-fill-color: white !important;
 }
 
+.btn-search-modal {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #00c9ff 100%);
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 242, 255, 0.2);
+}
+
+.btn-search-modal:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 242, 255, 0.4);
+}
+
 .modal-results-list {
     flex: 1;
     overflow-y: auto;

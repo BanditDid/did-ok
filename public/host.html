@@ -196,6 +196,9 @@
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
+                    <button class="btn-search-modal" onclick="performModalSearch()">
+                        ค้นหา
+                    </button>
                 </div>
                 <div id="modal-results-list" class="modal-results-list">
                     <!-- Search results here -->
@@ -478,7 +481,6 @@
             let currentSong = null;
             let isPlaying = false;
             let progressInterval;
-            let searchTimeout;
 
             function showToast(msg) {
                 const toast = document.getElementById('toast');
@@ -503,12 +505,9 @@
                 modalSearchInput.focus();
             }
 
-            // Toggle switch listener - focus input and re-search
+            // Toggle switch listener - focus input
             document.getElementById('host-karaoke-filter-toggle').addEventListener('change', () => {
                 modalSearchInput.focus();
-                if (modalSearchInput.value.trim().length >= 2) {
-                    performModalSearch();
-                }
             });
 
             // Load YouTube IFrame API
@@ -832,19 +831,10 @@
                 }
             }
 
-            document.getElementById('modal-search-input').addEventListener('input', (e) => {
-                clearTimeout(searchTimeout);
-                const query = e.target.value.trim();
-                if (query.length >= 2) {
-                    searchTimeout = setTimeout(() => {
-                        performModalSearch();
-                    }, 1500);
-                }
-            });
+
 
             document.getElementById('modal-search-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    clearTimeout(searchTimeout);
                     performModalSearch();
                 }
             });
