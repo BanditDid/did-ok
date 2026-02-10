@@ -12,6 +12,425 @@
         rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Side Panel Styles */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 380px;
+            max-width: 90vw;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(20, 20, 30, 0.98) 0%, rgba(10, 10, 15, 0.99) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+
+            /* Animation - ใช้ transform แทน right เพื่อ performance ดีขึ้น */
+            transform: translateX(100%);
+            visibility: hidden;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.35s ease;
+        }
+
+        .side-panel.active {
+            transform: translateX(0);
+            visibility: visible;
+        }
+
+        /* Panel Header */
+        .panel-header-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-titles h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .header-titles #queue-count {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-close-small {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .btn-close-small:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-clear-queue {
+            background: rgba(255, 77, 77, 0.15);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 77, 77, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-clear-queue:hover {
+            background: rgba(255, 77, 77, 0.25);
+        }
+
+        /* Panel Body */
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        /* Queue Cards */
+        .queue-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .queue-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.01);
+        }
+
+        .queue-card-inner {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            gap: 12px;
+        }
+
+        .queue-card-thumb {
+            width: 60px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .queue-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .queue-card-title {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .queue-card-author {
+            margin: 4px 0 0;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .queue-card-added-by {
+            display: block;
+            margin-top: 4px;
+            font-size: 11px;
+            color: rgba(0, 200, 255, 0.7);
+        }
+
+        .queue-card-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .queue-card-actions button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-play-now:hover {
+            background: rgba(0, 200, 100, 0.2);
+            transform: scale(1.1);
+        }
+
+        .btn-delete-song:hover {
+            background: rgba(255, 77, 77, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* Backdrop overlay เมื่อ panel เปิด (optional) */
+        .side-panel::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 380px;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            pointer-events: none;
+            transition: background 0.35s ease;
+        }
+
+        .side-panel.active::before {
+            background: rgba(0, 0, 0, 0.4);
+            pointer-events: auto;
+        }
+
+        /* Mobile */
+        @media (max-width: 480px) {
+            .side-panel {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .side-panel::before {
+                display: none;
+            }
+        }
+
+
+
+
+        /* Toast Notification - Modern Style */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.98));
+            color: #fff;
+            padding: 14px 24px 14px 18px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            max-width: calc(100vw - 40px);
+            min-width: 200px;
+            text-align: left;
+            font-family: 'Prompt', 'Inter', sans-serif;
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: toast-icon-pop 0.4s ease 0.2s both;
+        }
+
+        @keyframes toast-icon-pop {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .toast.toast-success .toast-icon {
+            background: linear-gradient(135deg, #00d68f, #00b887);
+            box-shadow: 0 4px 15px rgba(0, 214, 143, 0.4);
+        }
+
+        .toast.toast-error .toast-icon {
+            background: linear-gradient(135deg, #ff4d6d, #ff3366);
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
+        }
+
+        .toast.toast-warning .toast-icon {
+            background: linear-gradient(135deg, #ffbe0b, #fb8500);
+            box-shadow: 0 4px 15px rgba(255, 190, 11, 0.4);
+        }
+
+        .toast.toast-info .toast-icon {
+            background: linear-gradient(135deg, #00b4d8, #0096c7);
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);
+        }
+
+        .toast-icon svg {
+            width: 16px;
+            height: 16px;
+            stroke: white;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toast-message {
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            right: 16px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .toast-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00d68f, #00b4d8);
+            border-radius: 3px;
+            animation: toast-progress 3s linear forwards;
+        }
+
+        @keyframes toast-progress {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .toast {
+                bottom: 90px;
+                left: 20px;
+                right: 20px;
+                transform: translateX(0) translateY(100px);
+                max-width: none;
+                padding: 16px 20px 16px 16px;
+                border-radius: 14px;
+                font-size: 14px;
+            }
+
+            .toast.show {
+                transform: translateX(0) translateY(0);
+            }
+
+            .toast-icon {
+                width: 26px;
+                height: 26px;
+            }
+
+            .toast-icon svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .toast {
+                bottom: calc(100px + env(safe-area-inset-bottom));
+            }
+
+            @media (max-width: 768px) {
+                .toast {
+                    bottom: calc(90px + env(safe-area-inset-bottom));
+                }
+            }
+        }
+
+        .toast.slide-out {
+            animation: slideOut 0.3s ease forwards;
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(100px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .toast.slide-out {
+                animation: slideOutMobile 0.3s ease forwards;
+            }
+
+            @keyframes slideOutMobile {
+                from {
+                    opacity: 1;
+                    transform: translateX(0) translateY(0);
+                }
+
+                to {
+                    opacity: 0;
+                    transform: translateX(0) translateY(100px);
+                }
+            }
+        }
+    </style>
 </head>
 
 <body class="host-page">
@@ -19,7 +438,6 @@
         <div id="player-wrapper">
             <div id="player"></div>
             <div class="video-overlay"></div>
-            <!-- Error Cover Overlay - hides YouTube's ugly error screen -->
             <div id="player-error-cover" class="player-error-cover">
                 <div class="player-error-content">
                     <div class="player-error-icon">
@@ -36,9 +454,7 @@
             </div>
         </div>
 
-        <!-- Controls Overlay -->
         <div class="player-controls">
-            <!-- Time Display Row -->
             <div class="time-row">
                 <span class="time-current" id="time-current">0:00</span>
                 <span class="time-duration" id="time-duration">0:00</span>
@@ -48,7 +464,6 @@
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
 
-            <!-- Desktop Control Bar -->
             <div class="control-bar control-bar-desktop">
                 <div class="control-left">
                     <button id="main-play-pause" class="play-pause-circle">
@@ -116,7 +531,6 @@
                 </div>
             </div>
 
-            <!-- Mobile Control Bar -->
             <div class="control-bar control-bar-mobile">
                 <button id="main-play-pause-mobile" class="play-pause-circle" onclick="togglePlayPause()">
                     <svg id="play-icon-mobile" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
@@ -165,7 +579,7 @@
             </div>
         </div>
 
-        <!-- Overlays -->
+        <!-- Search Modal -->
         <div id="search-modal" class="search-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -196,15 +610,20 @@
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
+<<<<<<< HEAD
                     <button class="btn-search-modal" onclick="performModalSearch()">
                         ค้นหา
+=======
+                    <button class="btn-search-modal" id="modal-search-click-btn" onclick="performModalSearch()">
+                        <span>ค้นหา</span>
+>>>>>>> 196d3c3e22953fc0849acd2b7993c13455c0f92a
                     </button>
                 </div>
-                <div id="modal-results-list" class="modal-results-list">
-                    <!-- Search results here -->
-                </div>
+                <div id="modal-results-list" class="modal-results-list"></div>
             </div>
         </div>
+
+        <!-- Side Panel (Queue) -->
         <div id="side-panel" class="side-panel">
             <div class="panel-header-main">
                 <div class="header-left">
@@ -223,7 +642,6 @@
                 <button class="btn-clear-queue" onclick="clearQueue()">ล้างคิว</button>
             </div>
             <div id="panel-content" class="panel-body">
-                <!-- Content handled by updateQueueUI -->
                 <div id="queue-list-display"></div>
             </div>
         </div>
@@ -241,13 +659,10 @@
                         </svg>
                     </button>
                 </div>
-
                 <p class="remote-hint">สแกน QR Code หรือใช้รหัสด้านล่างเพื่อควบคุมผ่านมือถือ</p>
-
                 <div class="remote-qr-container">
                     <div id="qrcode"></div>
                 </div>
-
                 <div class="remote-info-grid">
                     <div class="info-item">
                         <label>รหัสผู้ใช้</label>
@@ -258,7 +673,6 @@
                         <span id="room-password-display" class="neon-text-pink">85661</span>
                     </div>
                 </div>
-
                 <div class="remote-link-section">
                     <label>ลิงก์เข้าห้อง</label>
                     <div class="link-input-group">
@@ -267,7 +681,6 @@
                         <button class="btn-copy-link" onclick="copyRoomLink()">คัดลอก</button>
                     </div>
                 </div>
-
                 <div class="remote-modal-footer">
                     <button class="btn-footer-gray" onclick="window.location.href='/'">กลับหน้าแรก</button>
                     <button class="btn-footer-red" onclick="resetRoom()">รีเซ็ตห้อง</button>
@@ -298,12 +711,6 @@
         <!-- Empty Queue Modal -->
         <div id="empty-queue-modal" class="empty-queue-modal">
             <div class="empty-queue-modal-content">
-                <!-- <button class="btn-close-empty-modal" onclick="hideEmptyQueueModal()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button> -->
                 <div class="empty-queue-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="80"
                         height="80">
@@ -338,17 +745,6 @@
                     </button>
                 </div>
                 <div class="settings-body">
-                    <div class="settings-item">
-                        <div class="settings-item-info">
-                            <span class="settings-item-label">ค้นหาอัตโนมัติ</span>
-                            <span class="settings-item-desc">ค้นหาทันทีหลังพิมพ์เสร็จ</span>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="perm-autoSearch"
-                                onchange="updatePermission('autoSearch', this.checked)">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
                     <div class="settings-item">
                         <div class="settings-item-info">
                             <span class="settings-item-label">เพิ่มเพลงในคิว</span>
@@ -430,7 +826,7 @@
             </div>
         </div>
 
-        <!-- Scoring Overlay -->
+        <!-- Score Overlay -->
         <div id="score-overlay">
             <div class="score-card">
                 <p class="score-title">YOUR SCORE</p>
@@ -464,8 +860,7 @@
             </div>
         </div>
 
-        <!-- Hidden queue source for toggle -->
-        <!-- Hidden queue source for toggle -->
+        <!-- Hidden queue source -->
         <div id="queue-source" style="display: none;">
             <div id="queue-list"></div>
         </div>
@@ -482,18 +877,115 @@
             let isPlaying = false;
             let progressInterval;
 
-            function showToast(msg) {
+            // ==================== TOAST SYSTEM ====================
+            const TOAST_ICONS = {
+                success: `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+                error: `<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+                warning: `<svg viewBox="0 0 24 24"><path d="M12 9v4"></path><circle cx="12" cy="16" r="0.5" fill="white"></circle></svg>`,
+                info: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" fill="white"></circle><path d="M12 16v-3"></path></svg>`
+            };
+
+            let currentToastTimeout = null;
+
+            function showToast(message, type = 'success', duration = 3000) {
                 const toast = document.getElementById('toast');
-                toast.innerText = msg;
+
+                if (currentToastTimeout) {
+                    clearTimeout(currentToastTimeout);
+                }
+
+                toast.classList.remove('show', 'slide-out', 'toast-success', 'toast-error', 'toast-warning', 'toast-info');
+
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        ${TOAST_ICONS[type] || TOAST_ICONS.success}
+                    </div>
+                    <div class="toast-content">
+                        <span class="toast-message">${message}</span>
+                    </div>
+                    <div class="toast-progress">
+                        <div class="toast-progress-bar" style="animation-duration: ${duration}ms"></div>
+                    </div>
+                `;
+
+                toast.classList.add(`toast-${type}`);
+                void toast.offsetWidth;
                 toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 3000);
+
+                currentToastTimeout = setTimeout(() => {
+                    hideToast();
+                }, duration);
+
+                setupSwipeToDismiss(toast);
             }
+
+            function hideToast() {
+                const toast = document.getElementById('toast');
+                const isMobile = window.innerWidth <= 768;
+
+                toast.classList.remove('show');
+                toast.classList.add('slide-out');
+
+                setTimeout(() => {
+                    toast.classList.remove('slide-out');
+                }, 300);
+
+                if (currentToastTimeout) {
+                    clearTimeout(currentToastTimeout);
+                    currentToastTimeout = null;
+                }
+            }
+
+            function setupSwipeToDismiss(toast) {
+                let startY = 0;
+                let currentY = 0;
+                let isDragging = false;
+
+                const onTouchStart = (e) => {
+                    startY = e.touches[0].clientY;
+                    isDragging = true;
+                    toast.style.transition = 'none';
+                };
+
+                const onTouchMove = (e) => {
+                    if (!isDragging) return;
+                    currentY = e.touches[0].clientY;
+                    const diff = currentY - startY;
+                    if (diff > 0) {
+                        toast.style.transform = window.innerWidth <= 768
+                            ? `translateX(0) translateY(${diff}px)`
+                            : `translateX(-50%) translateY(${diff}px)`;
+                        toast.style.opacity = Math.max(0, 1 - diff / 100);
+                    }
+                };
+
+                const onTouchEnd = () => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    const diff = currentY - startY;
+                    toast.style.transition = '';
+
+                    if (diff > 50) {
+                        hideToast();
+                    } else {
+                        toast.style.transform = '';
+                        toast.style.opacity = '';
+                    }
+                };
+
+                toast.removeEventListener('touchstart', onTouchStart);
+                toast.removeEventListener('touchmove', onTouchMove);
+                toast.removeEventListener('touchend', onTouchEnd);
+
+                toast.addEventListener('touchstart', onTouchStart, { passive: true });
+                toast.addEventListener('touchmove', onTouchMove, { passive: true });
+                toast.addEventListener('touchend', onTouchEnd, { passive: true });
+            }
+            // ==================== END TOAST SYSTEM ====================
+
             const modalSearchInput = document.getElementById('modal-search-input');
             const clearModalSearchBtn = document.getElementById('clear-modal-search-btn');
 
-            // Toggle clear button visibility for modal search
             modalSearchInput.addEventListener('input', () => {
                 clearModalSearchBtn.style.display = modalSearchInput.value.length > 0 ? 'flex' : 'none';
             });
@@ -505,7 +997,10 @@
                 modalSearchInput.focus();
             }
 
+<<<<<<< HEAD
             // Toggle switch listener - focus input
+=======
+>>>>>>> 196d3c3e22953fc0849acd2b7993c13455c0f92a
             document.getElementById('host-karaoke-filter-toggle').addEventListener('change', () => {
                 modalSearchInput.focus();
             });
@@ -523,7 +1018,7 @@
                     videoId: '',
                     playerVars: {
                         'autoplay': 1,
-                        'controls': 0, // Custom controls
+                        'controls': 0,
                         'modestbranding': 1,
                         'rel': 0,
                         'iv_load_policy': 3
@@ -539,7 +1034,6 @@
             function onPlayerReady(event) {
                 socket.emit('create-room');
 
-                // Progress Bar Logic
                 progressInterval = setInterval(() => {
                     if (player && player.getCurrentTime) {
                         const currentTime = player.getCurrentTime();
@@ -552,7 +1046,6 @@
                             document.getElementById('time-current').innerText = formatTime(currentTime);
                             document.getElementById('time-duration').innerText = formatTime(duration);
 
-                            // Emit state to remote
                             socket.emit('player-state', {
                                 roomId: currentRoomId,
                                 isPlaying,
@@ -567,7 +1060,7 @@
 
             function skipToNext() {
                 if (currentQueue.length === 0) {
-                    showToast('ไม่มีเพลงในคิว');
+                    showToast('ไม่มีเพลงในคิว', 'warning');
                     return;
                 }
                 if (currentRoomId) {
@@ -601,7 +1094,6 @@
                 }
             }
 
-            // Handle YouTube Player Errors - Show countdown modal and skip to next
             let errorCountdownInterval = null;
 
             function onPlayerError(event) {
@@ -615,7 +1107,6 @@
                 };
                 const errorMsg = errorMessages[event.data] || 'เกิดข้อผิดพลาดไม่ทราบสาเหตุ';
 
-                // Notify remote about the error
                 socket.emit('song-error', {
                     roomId: currentRoomId,
                     songTitle: currentSong?.title || 'เพลงนี้',
@@ -633,19 +1124,15 @@
 
                 errorReasonEl.innerText = reason;
                 modal.classList.add('active');
-
-                // Show the player error cover to hide YouTube's ugly error
                 document.getElementById('player-error-cover').classList.add('active');
 
                 let countdown = 5;
                 countdownNumber.innerText = countdown;
 
-                // Reset progress circle
-                const circumference = 2 * Math.PI * 45; // r=45
+                const circumference = 2 * Math.PI * 45;
                 progressCircle.style.strokeDasharray = circumference;
                 progressCircle.style.strokeDashoffset = 0;
 
-                // Animate countdown
                 errorCountdownInterval = setInterval(() => {
                     countdown--;
                     if (countdown > 0) {
@@ -662,7 +1149,6 @@
             function hideErrorCountdownModal() {
                 const modal = document.getElementById('error-countdown-modal');
                 modal.classList.remove('active');
-                // Also hide the player error cover
                 document.getElementById('player-error-cover').classList.remove('active');
                 if (errorCountdownInterval) {
                     clearInterval(errorCountdownInterval);
@@ -675,7 +1161,6 @@
                 socket.emit('request-next', currentRoomId);
             }
 
-            // Controls
             function togglePlayPause() {
                 if (isPlaying) player.pauseVideo();
                 else player.playVideo();
@@ -683,7 +1168,6 @@
 
             document.getElementById('main-play-pause').onclick = togglePlayPause;
 
-            // Loop Toggle
             let isLooping = false;
             function toggleLoop() {
                 isLooping = !isLooping;
@@ -695,11 +1179,11 @@
                 if (isLooping) {
                     btnLoop.classList.add('active-control');
                     if (btnLoopMobile) btnLoopMobile.classList.add('active-control');
-                    showToast('เปิดโหมดเล่นซ้ำ');
+                    showToast('เปิดโหมดเล่นซ้ำ', 'info');
                 } else {
                     btnLoop.classList.remove('active-control');
                     if (btnLoopMobile) btnLoopMobile.classList.remove('active-control');
-                    showToast('ปิดโหมดเล่นซ้ำ');
+                    showToast('ปิดโหมดเล่นซ้ำ', 'info');
                 }
             }
 
@@ -731,7 +1215,6 @@
                 document.getElementById('side-panel').classList.remove('active');
             }
 
-            // Settings Modal Logic
             function openSettingsModal() {
                 document.getElementById('settings-modal').classList.add('active');
             }
@@ -748,7 +1231,6 @@
                 });
             }
 
-            // Search Modal Logic
             function openSearchModal() {
                 document.getElementById('search-modal').classList.add('active');
                 document.getElementById('modal-search-input').focus();
@@ -762,7 +1244,6 @@
                 const query = document.getElementById('modal-search-input').value;
                 if (!query) return;
 
-                // Hide keyboard on mobile
                 if (document.activeElement) {
                     document.activeElement.blur();
                 }
@@ -811,12 +1292,11 @@
 
                             socket.emit('add-to-queue', { roomId: currentRoomId, song });
 
-                            // Feedback
                             btn.innerHTML = '✓';
                             btn.classList.add('added');
                             btn.disabled = true;
 
-                            showToast(`เพิ่ม "${song.title.substring(0, 30)}..." ลงคิวแล้ว`);
+                            showToast(`เพิ่ม "${song.title.substring(0, 25)}..." ลงคิวแล้ว`, 'success');
 
                             setTimeout(() => {
                                 btn.innerHTML = originalText;
@@ -828,11 +1308,15 @@
                     });
                 } catch (error) {
                     resultsList.innerHTML = '<div class="error">Search failed</div>';
+                    showToast('ค้นหาล้มเหลว กรุณาลองใหม่', 'error');
                 }
             }
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 196d3c3e22953fc0849acd2b7993c13455c0f92a
             document.getElementById('modal-search-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     performModalSearch();
@@ -845,6 +1329,7 @@
                     'คุณต้องการล้างคิวเพลงทั้งหมดหรือไม่?',
                     () => {
                         socket.emit('clear-queue', currentRoomId);
+                        showToast('ล้างคิวเพลงแล้ว', 'success');
                     }
                 );
             }
@@ -861,26 +1346,16 @@
                 const linkInput = document.getElementById('remote-link-input');
                 linkInput.select();
                 document.execCommand('copy');
-                const btn = document.querySelector('.btn-copy-link');
-                const originalText = btn.innerText;
-                btn.innerText = 'คัดลอกแล้ว!';
-                setTimeout(() => btn.innerText = originalText, 2000);
-            }
-
-            function resetRoom() {
-                if (confirm('คุณต้องการรีเซ็ตห้องและล้างคิวทั้งหมดหรือไม่?')) {
-                    window.location.reload();
-                }
+                showToast('คัดลอกลิงก์แล้ว', 'success');
             }
 
             socket.on('room-created', (roomId) => {
                 currentRoomId = roomId;
                 document.getElementById('room-id-display').innerText = roomId;
 
-                // Generate QR Code
                 const remoteUrl = `${window.location.origin}/remote.html?room=${roomId}`;
                 const qrContainer = document.getElementById("qrcode");
-                qrContainer.innerHTML = ''; // Clear previous
+                qrContainer.innerHTML = '';
                 new QRCode(qrContainer, {
                     text: remoteUrl,
                     width: 256,
@@ -890,11 +1365,9 @@
                     correctLevel: QRCode.CorrectLevel.L
                 });
 
-                // Update link input
                 document.getElementById('remote-link-input').value = remoteUrl;
                 console.log("Remote URL:", remoteUrl);
 
-                // Generate QR Code for Empty Queue Modal
                 const emptyQueueQrContainer = document.getElementById("empty-queue-qrcode");
                 emptyQueueQrContainer.innerHTML = '';
                 new QRCode(emptyQueueQrContainer, {
@@ -907,11 +1380,8 @@
                 });
                 document.getElementById('empty-queue-room-id').innerText = roomId;
 
-                // Handle automatic song addition from landing page
-                // Try sessionStorage first, then URL parameter as fallback (for mobile)
                 let pendingSong = null;
 
-                // Try sessionStorage
                 try {
                     const pendingSongJson = sessionStorage.getItem('pendingSong');
                     if (pendingSongJson) {
@@ -922,14 +1392,12 @@
                     console.warn('sessionStorage not available');
                 }
 
-                // Fallback to URL parameter
                 if (!pendingSong) {
                     const urlParams = new URLSearchParams(window.location.search);
                     const songParam = urlParams.get('song');
                     if (songParam) {
                         try {
                             pendingSong = JSON.parse(decodeURIComponent(songParam));
-                            // Clean URL
                             window.history.replaceState({}, document.title, window.location.pathname);
                         } catch (e) {
                             console.error('Failed to parse song from URL:', e);
@@ -937,7 +1405,6 @@
                     }
                 }
 
-                // Add song to queue if found
                 if (pendingSong && pendingSong.id) {
                     socket.emit('add-to-queue', { roomId: currentRoomId, song: pendingSong });
                 }
@@ -951,7 +1418,6 @@
                 queueCount.innerText = `${queue.length} เพลง`;
                 queueListDisplay.innerHTML = '';
 
-                // Update queue badges
                 const badge = document.getElementById('queue-badge');
                 const badgeMobile = document.getElementById('queue-badge-mobile');
                 if (queue.length > 0) {
@@ -998,17 +1464,16 @@
                         e.stopPropagation();
                         if (!currentRoomId) return alert('Room not ready');
                         socket.emit('remove-from-queue', { roomId: currentRoomId, index });
+                        showToast('ลบเพลงออกจากคิวแล้ว', 'info');
                     };
 
                     queueListDisplay.appendChild(div);
                 });
 
-                // If nothing is playing and we have items, request next
                 if (!currentSong && queue.length > 0) {
                     socket.emit('request-next', currentRoomId);
                 }
 
-                // Close empty queue modal if songs are added
                 if (queue.length > 0) {
                     hideEmptyQueueModal();
                 }
@@ -1020,13 +1485,11 @@
                     document.getElementById('current-title').innerText = song.title;
                     document.getElementById('current-artist').innerText = song.author;
                     player.loadVideoById(song.id);
-                    // Hide empty queue modal when song starts playing
                     hideEmptyQueueModal();
                 } else {
                     currentSong = null;
                     document.getElementById('current-title').innerText = "Welcome to Karaoke";
                     document.getElementById('current-artist').innerText = "Scan QR to start singing!";
-                    // Show empty queue modal when no songs left
                     showEmptyQueueModal();
                 }
             });
@@ -1050,7 +1513,7 @@
             });
 
             function showScore() {
-                const score = Math.floor(Math.random() * 26) + 75; // 75-100
+                const score = Math.floor(Math.random() * 26) + 75;
                 document.getElementById('final-score').innerText = score;
                 const overlay = document.getElementById('score-overlay');
                 overlay.style.display = 'flex';
@@ -1061,7 +1524,6 @@
                 }, 5000);
             }
 
-            // Empty Queue Modal Functions
             function showEmptyQueueModal() {
                 document.getElementById('empty-queue-modal').classList.add('active');
             }
@@ -1070,7 +1532,6 @@
                 document.getElementById('empty-queue-modal').classList.remove('active');
             }
 
-            // Auto-hide controls after 5 seconds of no mouse movement (fullscreen only)
             let hideControlsTimeout;
             const playerControls = document.querySelector('.player-controls');
             const fullscreenPlayer = document.querySelector('.fullscreen-player');
@@ -1085,21 +1546,18 @@
                 fullscreenPlayer.style.cursor = 'default';
                 clearTimeout(hideControlsTimeout);
 
-                // Only auto-hide in fullscreen mode
                 if (isFullscreen()) {
                     hideControlsTimeout = setTimeout(hideControls, 5000);
                 }
             }
 
             function hideControls() {
-                // Only hide in fullscreen mode
                 if (!isFullscreen()) {
                     playerControls.classList.remove('hidden');
                     fullscreenPlayer.style.cursor = 'default';
                     return;
                 }
 
-                // Don't hide if a modal is open or side panel is active
                 const searchModal = document.getElementById('search-modal');
                 const remoteModal = document.getElementById('remote-modal');
                 const sidePanel = document.getElementById('side-panel');
@@ -1114,10 +1572,8 @@
                 fullscreenPlayer.style.cursor = 'none';
             }
 
-            // Mouse move listener
             fullscreenPlayer.addEventListener('mousemove', showControls);
 
-            // Keep controls visible when hovering over them
             playerControls.addEventListener('mouseenter', () => {
                 clearTimeout(hideControlsTimeout);
             });
@@ -1128,7 +1584,6 @@
                 }
             });
 
-            // Show controls when exiting fullscreen
             document.addEventListener('fullscreenchange', () => {
                 if (!isFullscreen()) {
                     showControls();
@@ -1140,7 +1595,6 @@
                 }
             });
 
-            // Custom Confirm Modal Functions
             function showConfirmModal(title, message, onConfirm) {
                 document.getElementById('confirm-title').innerText = title;
                 document.getElementById('confirm-message').innerText = message;
@@ -1157,7 +1611,6 @@
                 document.getElementById('confirm-modal').classList.remove('active');
             }
 
-            // Reset room function with custom confirmation
             function resetRoom() {
                 showConfirmModal(
                     'รีเซ็ตห้อง',
