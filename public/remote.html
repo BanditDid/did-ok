@@ -334,12 +334,6 @@
             <div id="remote-results-overlay" class="results-overlay-v2">
                 <div class="results-header" id="results-header">
                     <span class="results-title">ผลการค้นหา (<span id="results-count">0</span>)</span>
-                    <button class="btn-toggle-results" onclick="toggleSearchResults()" title="ยุบ/ขยาย">
-                        <svg id="toggle-results-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" width="18" height="18">
-                            <polyline points="18 15 12 9 6 15"></polyline>
-                        </svg>
-                    </button>
                 </div>
                 <div id="remote-results-list" class="results-list-v2"></div>
             </div>
@@ -779,26 +773,13 @@
         let searchTimeout;
         let currentSearchQuery = '';
         let currentSearchPage = 1;
-        let isResultsCollapsed = false;
+
         const searchInput = document.getElementById('remote-search-input');
         const clearRemoteSearchBtnEl = document.getElementById('clear-remote-search-btn');
         const resultsOverlay = document.getElementById('remote-results-overlay');
         const resultsList = document.getElementById('remote-results-list');
 
-        // Toggle search results collapse/expand
-        function toggleSearchResults() {
-            isResultsCollapsed = !isResultsCollapsed;
-            const resultsList = document.getElementById('remote-results-list');
-            const icon = document.getElementById('toggle-results-icon');
 
-            if (isResultsCollapsed) {
-                resultsList.style.display = 'none';
-                icon.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>';
-            } else {
-                resultsList.style.display = 'block';
-                icon.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>';
-            }
-        }
 
         function clearRemoteSearchInput() {
             searchInput.value = '';
